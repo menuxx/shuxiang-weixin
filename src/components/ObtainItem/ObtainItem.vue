@@ -1,0 +1,150 @@
+<template>
+  <div class="sx-container">
+
+    <div v-transfer-dom>
+      <x-dialog v-model="showAddSysAddress" style="padding: 10px;">
+        <cell title="添加收货地址" @click.native="showAddSysAddress = false">
+          <img width="20" style="display:block;margin-right:5px;" src="../../assets/close-empty.svg" />
+        </cell>
+        <NewAddressPanel @submit="onAddressChoose" />
+      </x-dialog>
+    </div>
+
+    <div class="sx-address-item">
+        <div class="sx-address-item_view">
+          <div class="p1">
+            <div class="line1">
+              <span class="receiver-name">{{ receiver.receiverName }}</span>
+              <span class="phone-number">{{ receiver.phoneNumber }}</span>
+            </div>
+            <div class="line2">
+                {{ receiver.province }}{{ receiver.city }}{{ receiver.country }}{{ receiver.detailInfo }}
+            </div>
+          </div>
+          <div class="p2">
+            <a class="sx-btn-apply">
+              <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+    </div>
+
+    <group gutter="0">
+      <cell @click.native="onChooseSysAddress" title="手动添加收货地址" is-link :border-intent="false">
+        <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/plus.svg" />
+      </cell>
+      <cell @click.native="onChooseWxAddress" title="一键获取微信地址" is-link :border-intent="false" :disabled="false" :is-loading="true">
+        <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/wechat.svg" />
+      </cell>
+    </group>
+
+    <div class="book-list-1" v-for="i in [1,2]" :key="i">
+      <div class="book-item">
+        <div class="col1">
+          <img class="item-thumb" src="https://pro.modao.cc/uploads3/images/1494/14947625/raw_1512110740.jpeg">
+        </div>
+        <div class="col2">
+          <h4 class="item-name">{{ itemName }}</h4>
+          <p class="item-desc-text">{{ describe }}</p>
+        </div>
+        <div class="col3">
+          <a class="attach-line">限 1 本</a>
+        </div>
+      </div>
+    </div>
+
+    <divider class="sx-spl">立即领取</divider>
+    <x-button @click="" type="primary" :show-loading="false">「{{ ownerName }}」送出 {{ stock }} 本新书，马上抢读</x-button>
+
+  </div>
+
+</template>
+<style lang="scss" scoped>
+@import '../EditAddress/EditAddress';
+@import "../../styles/book-list1";
+.sx-container {
+
+}
+.sx-address-item {
+  padding: 0;
+  .p2 {
+    .sx-btn-apply {
+        display: block;
+        height: 2rem;
+        width: 2rem;
+        line-height: 2rem;
+        text-align: center;
+        color: #38f;
+    }
+  }
+}
+.sx-address-item:after {
+    content: ' ';
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-image: url(../../assets/sp.png);
+    background-size: 34px 2px;
+}
+.choose-address-btn {
+  .btn-item {
+    padding: 0.5rem;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #ccc;
+  }
+  .sx-btn-icon {
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+  }
+  .sx-btn-icon-plus {
+    color: #d4237a;
+  }
+  .sx-btn-icon-weixin {
+    color: #1AAD19;
+  }
+}
+// 分割线
+.sx-spl {
+  font-size: 0.7rem;
+}
+</style>
+<script>
+// 持有项目
+import { XButton, CellBox,  Grid, GridItem, Divider, Cell, Group, XDialog, TransferDomDirective as TransferDom } from 'vux'
+import NewAddressPanel from '@/components/EditAddress/NewAddressPanel'
+import { mapState } from 'vuex'
+
+export default {
+  directives: { TransferDom },
+  components : { XButton, Divider, Grid, GridItem, Cell, CellBox, Group, XDialog, NewAddressPanel },
+  data() {
+    return {
+      showAddSysAddress: true
+    }
+  },
+  computed: mapState({
+	  obtainItem: state => state.obtainItemOrder.obtainItem,
+	  receiver: state => state.obtainItemOrder.receiver
+  }),
+  beforeRouteEnter () {
+
+  },
+  methods: {
+    onChooseSysAddress() {
+      this.showAddSysAddress = true
+    },
+    onChooseWxAddress() {
+    },
+    /**
+     * 档地址被创建的时候
+     */
+    onAddressChoose(address) {
+
+      this.showAddSysAddress = true
+    }
+  }
+}
+</script>

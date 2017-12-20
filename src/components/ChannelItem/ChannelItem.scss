@@ -1,0 +1,96 @@
+.sx-container {
+  
+}
+  .item-image {
+      width: 100%;
+  }
+  .item-author-section {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.8rem;
+      .item-author-text {
+        text-align: left;
+      }
+      .item-author-name {
+        display: block;
+        text-align: right;
+      }
+  }
+  .item-stock-section {
+    width: 100%;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    .item-stock-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #ff9800;
+    }
+  }
+  .obtain-partner-section {
+    text-align: left;
+    padding: 0 1.2rem;
+    margin-bottom: 1rem;
+    .partner-section-title {
+      font-size: 0.7rem;
+      color: #aaaaaa;
+    }
+    .partner-list-horizontal {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-start;
+      .user-avatar {
+        display: block;
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        margin-right: 0.3rem;
+      }
+      .more-btn {
+        display: block;
+        border-radius: 50%;
+        min-width: 2rem;
+        min-height: 2rem;
+        border: 1px solid #ccc;
+        line-height: 2rem;
+        text-align: center;
+        font-size: 0.5rem;
+      }
+    }
+  }
+  .more-op-section {
+    margin-bottom: 1rem;
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    .sx-btn-circle {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      justify-content: center;
+      height: 3rem;
+      width: 3rem;
+      border: 1px solid #ccc;
+      border-radius: 50%;
+      .btn-sm-name {
+        font-size: 0.6rem;
+      }
+      .fa {
+        font-size: 1rem;
+      }
+    }
+    .btn-sm-share {
+      margin-right: 0.5rem;
+    }
+    .btn-sm-poster {
+      margin-right: 0.5rem;
+    }
+  }
+  .btn-block-primary {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+    font-size: 0.8rem;
+    color: #fff;
+    text-align: center;
+    background-color: rgb(37, 155, 36);
+  }

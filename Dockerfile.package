@@ -1,0 +1,13 @@
+FROM nginx:alpine
+MAINTAINER YinChangsheng <yinchangsheng@gmail.com>
+
+RUN apk update && apk add tar
+
+COPY dist.tgz /dist.tgz
+
+RUN tar zxf /dist.tgz -C /usr/share/nginx/html --strip-components=1
+
+EXPOSE 80
+EXPOSE 443
+
+CMD ["nginx", "-g", "daemon off;"]

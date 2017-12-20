@@ -1,0 +1,35 @@
+.sx-address-item {
+  padding: 0.3rem;
+  .sx-address-item_view {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.8rem;
+    align-items: center;
+    padding: 0.5rem;
+    .p1 {
+      text-align: left;
+      .line1 {
+        margin-bottom: 0.5rem;
+        .receiver-name {
+          font-weight: bold;
+        }
+        .phone-number {
+
+        }
+      }
+      .line2 {
+      }
+    }
+    .p2 {
+      .sx-btn-apply {
+        
+      }
+    }
+  }
+}
+.sx-bottom-bar {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}

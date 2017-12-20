@@ -1,0 +1,53 @@
+
+.book-item {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8rem;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  .col1 {
+    .item-thumb {
+      width: 100px;
+      height: 100px;
+    }
+  }
+  .col2 {
+    text-align: left;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    .item-name {
+      font-weight: normal;
+      margin: 0;
+    }
+    .item-desc-text {
+      margin: 0;
+      color: #aaaaaa;
+      font-size: 0.7rem;
+    }
+    .price {
+      font-size: 0.7rem;  
+    }
+  }
+  .col3 {
+    display: flex;
+    flex-flow: row nowrap;
+    padding: 0.5rem 0;
+    .xs-btn-buy {
+      color: #fff;
+      padding: 0.1rem 0.6rem;
+      font-size: 0.7rem;
+      background-color: #259b24;
+      align-self: flex-end;
+    }
+    .attach-line {
+      align-self: flex-start;
+    }
+  }
+}
+
+.book-item:last-child {
+  border-bottom: none;
+}
