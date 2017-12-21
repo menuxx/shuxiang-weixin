@@ -55,11 +55,11 @@
   import {QiNiuImagePrefix} from '../../config'
   import {mapState, mapMutations} from 'vuex'
   import isEmpty from 'is-empty'
-  import debounce from 'debounce-promise'
 
   import PartnerListView from './PartnerList'
   import {Popup, TransferDomDirective as TransferDom } from 'vux'
 
+  import {getLoopRefId, setLoopRefId, debounceLoopChannelState, loopChannelState} from '../../obtainItem'
   import store from '../../sotre'
   import * as types from '../../sotre/types'
   import http from '../../http'
@@ -78,45 +78,6 @@
   }
 
   /**
-   * 轮询渠道状态
-   *
-   * debounceLoopChannelState(channelId, loopRefId)
-   */
-
-  var debounceLoopChannelFn = function () {}
-
-  function debounceLoopChannelState(channelId, loopRefId) {
-    debounceLoopChannelFn = debounce(function () { return loopChannelState(channelId, loopRefId); }, 800)
-    // 第一次运行没有返回第二次会有
-    return debounceLoopChannelFn()
-  }
-
-  function loopChannelState(channelId, loopRefId) {
-    var loopUrl = api.LoopChannelItemState.replace('{channelId}', channelId) + '?loopRefId=' + loopRefId
-    return http.get(loopUrl).then((res) => {
-      var {stateCode} = res.data
-      // 成功抢到
-      if (stateCode === States.Obtain) {
-        return States.Obtain
-      } else {
-        // 如果错误就终止轮询
-        if ( stateCode === States.Fail ) {
-          return States.Fail
-        }
-        // 只要未结束，只要没有已经消费国，就可以继续抢购
-        if ( stateCode !== States.Finish || stateCode !== States.ObtainConsumeAgain || stateCode !== States.ObtainConsumed) {
-          // 轮询知道有期待的结果返回
-          return debounceLoopChannelFn()
-        }
-        // 否则返回最终状态码
-        else {
-          return stateCode
-        }
-      }
-    })
-  }
-
-  /**
    * 渠道商品抢购
    */
   function channelItemObtain(channelId) {
@@ -124,7 +85,27 @@
       var {errCode, loopRefId, messageId, errMsg} = res.data
       // 满足轮询状态开始轮训
       if (errCode === 0 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
-        return debounceLoopChannelState(channelId, loopRefId)
+        setLoopRefId(loopRefId)
+        return debounceLoopChannelState(channelId, loopRefId).then(stateCode => {
+          // 成功抢到
+          if (stateCode === States.Obtain) {
+            return States.Obtain
+          } else {
+            // 如果错误就终止轮询
+            if ( stateCode === States.Fail ) {
+              return States.Fail
+            }
+            // 只要未结束，只要没有已经消费国，就可以继续抢购
+            if ( stateCode !== States.Finish || stateCode !== States.ObtainConsumeAgain || stateCode !== States.ObtainConsumed) {
+              // 轮询知道有期待的结果返回
+              return debounceLoopChannelFn()
+            }
+            // 否则返回最终状态码
+            else {
+              return stateCode
+            }
+          }
+        })
       } else {
         return Promise.reject(new Error(errMsg))
       }
@@ -150,8 +131,13 @@
         .then( res => {
           next(vm => {
             // 合并数据
+            // 如果存在 长轮训 id 就继续之前的操作
+            var loopRefId = getLoopRefId()
+            if ( !isEmpty(loopRefId) ) {
+              vm.continueLoopChannelState( loopRefId, channelId )
+            }
             // mutation 更新 store 中的 channelItem
-            vm[types.CHANNEL_ITEM_LOADED]( res[0].data )
+            vm.channelItemLoaded( res[0].data )
           })
         })
       } else {
@@ -161,7 +147,6 @@
     computed: mapState({
       item: state => state.channelItem.item,
       channelId: state => state.channelItem.channelId,
-      coverImageUrl: state => cdnFullUrl(state.channelItem.coverImage, QiNiuImagePrefix.item),
       ownerAvatarUrl: state => cdnFullUrl(state.channelItem.ownerAvatar, QiNiuImagePrefix.vipChannelAvatar),
       giftTxt: state => state.channelItem.giftTxt, // 赠语
       stock: state => state.channelItem.stock,  // 库存
@@ -170,7 +155,9 @@
       partners: state => state.channelItem.partners
     }),
     methods: {
-      ...mapMutations([types.CHANNEL_ITEM_LOADED]),
+      ...mapMutations({
+          channelItemLoaded: types.CHANNEL_ITEM_LOADED
+      }),
       // 分享该渠道
       onShareChannel() {
         console.log("分享该渠道")
@@ -181,28 +168,40 @@
       popupPartnerListView() {
         this.showPartnerListView = true
       },
+      /**
+       * 继续长轮训状态
+       */
+      continueLoopChannelState(loopRefId, channelId) {
+        loopChannelState(loopRefId, channelId).then( stateCode => {
+          this.requestObtainResult(stateCode)
+        })
+      },
+      requestObtainResult(stateCode) {
+        // 成功求购，可以进入消费状态
+        // 成功抢购后会 持有 60 秒
+        switch (stateCode) {
+          // 成功持有
+          case States.Obtain:
+            // 提交状态
+            this.$router.push({path: `/obtain_channel_item/${this.channelId}`})
+            break;
+          // 已消费(已经抢到了)
+          case States.ObtainConsumed:
+          case States.ObtainConsumeAgain:
+            break;
+          // 已经结束了
+          case States.Finish:
+            break;
+          case States.Fail:
+            console.log('发生了错误')
+            break;
+        }
+      },
+
       // 开始抢购
       requestObtain() {
         channelItemObtain(this.channelId).then(stateCode => {
-          // 成功求购，可以进入消费状态
-          // 成功抢购后会 持有 60 秒
-          switch (stateCode) {
-            // 成功持有
-            case States.Obtain:
-              // 提交状态
-              this.$router.push({path: `/obtain_item/${this.channelId}`})
-              break;
-            // 已消费(已经抢到了)
-            case States.ObtainConsumed:
-            case States.ObtainConsumeAgain:
-              break;
-            // 已经结束了
-            case States.Finish:
-              break;
-            case States.Fail:
-              console.log('发生了错误')
-              break;
-          }
+          this.requestObtainResult(stateCode)
         })
       }
     }

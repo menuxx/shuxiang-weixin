@@ -22,6 +22,9 @@ export const DelMyAddress = '/user_addresses/addressId'
 
 export const UpdateMyAddress = '/user_addresses/{addressId}'
 
+// 请求消费一个持有（抢到的东西）
+export const RequestConsumeObtain = '/channel_store/{channelId}/consume'
+
 export const getVipChannelItem = channelId => {
 	return http.get(VipChannelItem.replace('{channelId}', channelId))
 }
@@ -59,6 +62,23 @@ export const getSessionTokenByCode = ( code ) => {
  */
 export const refreshSessionToken = (token) => {
   return http.put(`/auth/refresh_token`, { token })
+}
+
+/**
+ * 获取微信配置
+ */
+export const getWeiXinConfig = (url) => {
+  return http.get(`/weixin/config?url=${encodeURIComponent(url)}`)
+}
+
+/**
+ * 请求消费一个持有
+ * @param channelId
+ * @param addressId
+ * @returns {AxiosPromise<any>}
+ */
+export const requestConsumeObtain = (channelId, addressId) => {
+  return http.put(RequestConsumeObtain.replace('{channelId}', channelId), { addressId })
 }
 
 export const getMyAddresses = () => {}

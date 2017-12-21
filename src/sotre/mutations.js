@@ -1,4 +1,6 @@
 
+import {cdnFullUrl} from '../filters'
+import {QiNiuImagePrefix} from '../config'
 import * as types from './types'
 
 // 此处更新 state
@@ -23,5 +25,28 @@ export default {
     // 得到还剩下多少本书
     // state.channelItem.remainNum = 库存数 - 订单数
     state.channelItem.item = payload.item
-	}
+    // 处理图片 url
+    state.channelItem.item.coverImageUrl = cdnFullUrl(payload.item.coverImage, QiNiuImagePrefix.item)
+
+    state.channelItem.stock = payload.stock
+	},
+  /**
+   * 更新我的收货人地址信息
+   * @param state
+   * @param payload
+   * {
+   *    id: '', // 地址id
+   *    receiverName: '', // 联系人姓名
+			  phoneNumber: '',	// 联系人手机号
+        province: '',	// 所在地址 省，市，县
+        city: '',
+        country: '',
+			  postalCode: '', // 邮编
+			  detailInfo: '' // 具体收货地址，精确到小区楼宇
+		  }
+   */
+  // 更新收货人信息
+  [types.MY_RECEIVER_ADDRESS_UPDATE] (state, payload) {
+    state.channelOrder.receiver = payload
+  }
 }

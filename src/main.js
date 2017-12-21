@@ -7,6 +7,11 @@ import router from './router'
 import store from './sotre'
 import http from './http'
 
+if (process.env.NODE_ENV === 'development') {
+  var VConsole = require('vconsole')
+  new VConsole()
+}
+
 import 'font-awesome-webpack'
 
 import {
@@ -14,7 +19,6 @@ import {
     CloseDialogsPlugin,
     ConfigPlugin,
     BusPlugin,
-    LocalePlugin,
     DevicePlugin,
     ToastPlugin,
     AlertPlugin,

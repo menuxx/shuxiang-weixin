@@ -5,13 +5,14 @@ import * as types from '../sotre/types'
 import isEmpty from 'is-empty'
 import qs from 'querystring'
 import * as auth from '../http/auth'
+import * as weixin from '../weixin'
 import {getSessionTokenByCode, refreshSessionToken} from '../http/api'
 import config from '../config'
 
 // import HomePage from '@/components/HomePage/HomePage'
 // import ChannelItem from '@/components/ChannelItem/ChannelItem'
 // import ChannelItemPartnerList from '@/components/ChannelItem/PartnerList'
-// import ObtainItem from '@/components/ObtainItem/ObtainItem'
+// import ObtainChannelItem from '@/components/ObtainChannelItem/ObtainChannelItem'
 // import ConsumeObtainSuccess from '@/components/ConsumeObtainSuccess/ConsumeSuccess'
 // import EditAddress from '@/components/EditAddress/EditAddress'
 // import OrderList from '@/components/OrderList/OrderList'
@@ -37,7 +38,7 @@ const router = new Router({
     },
     {
       // 渠道书籍页面
-      path: '/channels/:channelId/item',
+      path: '/channel_item/:channelId',
       meta: { needAuth: true },
       component: function (resolve) {
         require(['../components/ChannelItem/ChannelItem'], resolve)
@@ -53,10 +54,10 @@ const router = new Router({
     },
     {
       // 持有一个 item ，待填写 address ，支付并领取
-      path: '/obtain_item/:itemId',
+      path: '/obtain_channel_item/:channelId',
       meta: { needAuth: true },
       component: function (resolve) {
-        require(['../components/ObtainItem/ObtainItem'], resolve)
+        require(['../components/ObtainChannelItem/ObtainChannelItem'], resolve)
       }
     },
     {
@@ -91,19 +92,41 @@ const router = new Router({
   ]
 })
 
-function withOutCodeUrl(code, url) {
-  return url.replace(`code=${code}&`, '').replace(`code=${code}`, '')
+function clearQueryWithUrl(argName, code, url) {
+  return url.replace(`${argName}=${code}&`, '').replace(`${argName}=${code}`, '')
 }
 
 var timeId = null
 
 // 如果一个路由不能再 2 内完成，就显示加载
 router.beforeEach((to, from, next) => {
-  // 量秒内不能完成跳转，就显示 loading
-  timeId = setTimeout(function () {
-    store.commit(types.UPDATE_LOADING_STATE, { isLoading: true })
-  }, 2000)
-  next()
+
+  try {
+
+    timeId = setTimeout(function () {
+      store.commit(types.UPDATE_LOADING_STATE, { isLoading: true })
+    }, 2000)
+
+    function wxInitSuccess() {
+      // 量秒内不能完成跳转，就显示 loading
+      console.log('weixin-jspai: init successfully')
+      next()
+    }
+
+    function wxInitFail(err) {
+      alert('出错了，微信初始化失败:' + err.message)
+    }
+
+    var wxConfig = weixin.getWeixinConfig()
+
+    if ( !isEmpty(wxConfig) ) {
+      weixin.initConfig(Vue.wechat, wxConfig).then(wxInitSuccess, wxInitFail)
+    } else {
+      weixin.getWeixinConfigSync(Vue.wechat, location.href).then(wxInitSuccess, wxInitFail)
+    }
+  } catch (e) {
+    console.error(e)
+  }
 })
 
 router.afterEach((to) => {
@@ -116,18 +139,25 @@ router.beforeEach((to, from, next) => {
   // 如果目标页面需要等露，就执行该验证流程
   if ( to.meta.needAuth ) {
     // 微信回传的 code
-    var {code} = qs.parse(location.search.substr(1))
+    var {code, state} = qs.parse(location.search.substr(1))
     if ( !isEmpty(code) ) {
       var href = location.href
       // 如果有 多个 code 全部替换掉
       if ( Array.isArray(code) ) {
         auth.newAuthCode(code[0])
         code.forEach(aCode => {
-          href = withOutCodeUrl(aCode, href)
+          href = clearQueryWithUrl('code', aCode, href)
         })
       } else {
         auth.newAuthCode(code)
-        href = withOutCodeUrl(code, href)
+        href = clearQueryWithUrl('code', code, href)
+      }
+      if ( Array.isArray(state) ) {
+        state.forEach(aState => {
+          href = clearQueryWithUrl('state', aState, href)
+        })
+      } else {
+        href = clearQueryWithUrl('state', state, href)
       }
       // 存储 code 等待使用
       return location.href = href  // 刷新一个 没有 code 的url 防止出现 code 错误的问题 会导致页面重新刷新一次

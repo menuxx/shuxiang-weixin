@@ -46,14 +46,12 @@ const state = {
     item: null
   },
 	// 抢购订单
-	obtainItemOrder: {
+	channelOrder: {
     	// 收货人信息
     	receiver : {
     		receiverName: '', // 联系人姓名
 			  phoneNumber: '',	// 联系人手机号
-			  province: '',	// 省份
-			  city: '',	// 城市
-			  country: '', // 县区
+        areaAddress: '',	// 所在地址 省，市，县
 			  postalCode: '', // 邮编
 			  detailInfo: '' // 具体收货地址，精确到小区楼宇
 		},
@@ -63,6 +61,8 @@ const state = {
 	},
 	orders: []
 }
+
+console.log('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
 export default new Vuex.Store({
     state,
