@@ -1,26 +1,33 @@
 const WEIXIN_CONFIG_KEY = '__weixin__config__'
 
 import isEmpty from 'is-empty'
-import {getWeiXinConfig} from '../http/api'
+import {fetchWeiXinConfig} from '../http/api'
 
 // 等价对象
-export const setWeixinConfig = (config) => {
+export const setWeiXinConfig = (config) => {
   localStorage.setItem(WEIXIN_CONFIG_KEY, JSON.stringify({
     meta: { createAt: Date.now() },
     data: config
   }))
 }
 
-export const getWeixinConfig = () => {
+export const removeWeiXinConfig = () => {
+  localStorage.removeItem(WEIXIN_CONFIG_KEY)
+}
+
+export const getWeiXinConfig = () => {
   var itemJson = localStorage.getItem(WEIXIN_CONFIG_KEY)
   var data = JSON.parse(itemJson)
   // 一个小时缓存时间
   if ( isEmpty(data) ) { return null }
   if ( isEmpty(data.meta) ) { return null }
-  if ( Date.now() - data.meta.createAt > 3600 * 1000  ) {
+  if ( Date.now() - data.meta.createAt > 1800 * 1000  ) {
+    return null
+  } else {
     return data.data
   }
 }
+
 
 /**
  * 文档
@@ -32,9 +39,10 @@ export const getWeixinConfig = () => {
 
 var JS_API_LIST = ['openAddress', 'chooseWXPay', 'onMenuShareAppMessage', 'onMenuShareTimeline', 'previewImage']
 
-export const initConfig =  (wx, config) => {
+export const initConfig = (wx, config) => {
 
   wx.config(Object.assign({}, {
+    debug: process.env.NODE_ENV === 'development',
     jsApiList: JS_API_LIST
   }, config))
 
@@ -62,9 +70,11 @@ export const initConfig =  (wx, config) => {
 /**
  * 同步服务器 config
  */
-export const getWeixinConfigSync = (wx, url)=> {
-  return getWeiXinConfig(url).then(res => {
-    setWeixinConfig(res.data)
+export const getWeiXinConfigSync = (wx, url)=> {
+  console.log('11111')
+  return fetchWeiXinConfig(url).then(res => {
+    console.log(res.data)
+    setWeiXinConfig(res.data)
     return initConfig(wx, res.data.jsApiConfig)
   }, err => {
     console.log(err)

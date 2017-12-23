@@ -6,7 +6,7 @@
         <cell title="添加收货地址" @click.native="showAddAddressDialog = false">
           <img width="20" style="display:block;margin-right:5px;" src="../../assets/close-empty.svg" />
         </cell>
-        <NewAddressPanel @submit="onAddressChoose" />
+        <NewAddressPanel @submit="onNewAddressSubmit" />
       </x-dialog>
     </div>
 
@@ -62,29 +62,26 @@
 <style lang="scss" scoped>
 @import '../EditAddress/EditAddress';
 @import "../../styles/book-list1";
-.sx-container {
-
-}
 .sx-address-item {
   padding: 0;
   .p2 {
     .sx-btn-apply {
-        display: block;
-        height: 2rem;
-        width: 2rem;
-        line-height: 2rem;
-        text-align: center;
-        color: #38f;
+      display: block;
+      height: 2rem;
+      width: 2rem;
+      line-height: 2rem;
+      text-align: center;
+      color: #38f;
     }
   }
 }
 .sx-address-item:after {
-    content: ' ';
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-image: url(../../assets/sp.png);
-    background-size: 34px 2px;
+  content: ' ';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-image: url(../../assets/sp.png);
+  background-size: 34px 2px;
 }
 .choose-address-btn {
   .btn-item {
@@ -106,6 +103,9 @@
     color: #1AAD19;
   }
 }
+.sx-container {
+
+}
 // 分割线
 .sx-spl {
   font-size: 0.7rem;
@@ -120,6 +120,14 @@ import * as types from '../../sotre/types'
 import * as api from '../../http/api'
 import isEmpty from 'is-empty'
 import {getLoopRefId, setLoopRefId, debounceLoopChannelState} from '../../obtainItem'
+
+function getAddress(addressId) {
+  if ( isEmpty(addressId) ) {
+    return api.getMyPrimaryAddress()
+  } else {
+    return api.getMyAddresses(addressId)
+  }
+}
 
 export default {
   directives: { TransferDom },
@@ -141,10 +149,12 @@ export default {
    */
   beforeRouteEnter (to, from, next) {
     var {channelId} = to.params
+    var {addressId} = to.query
     channelId = parseInt(channelId, 10)
+    addressId = parseInt(addressId, 10)
     Promise.all([
       api.getVipChannelItem(channelId),
-      api.getMyPrimaryAddress()
+      getAddress(addressId)
     ]).then(res => {
       var channelItem = res[0].data
       var primaryAddress = res[1].data
@@ -173,8 +183,16 @@ export default {
     /**
      * 档地址被创建的时候
      */
-    onAddressChoose(address) {
-      this.showAddAddressDialog = true
+    onNewAddressSubmit(address) {
+      api.addNewAddress(address).then( res => {
+        var address = res.data
+        if ( !isEmpty(address.id) ) {
+          // 保存成功关闭 dialog
+          this.showAddAddressDialog = false
+        } else {
+          this.$vux.toast.text('地址创建失败', 'middle')
+        }
+      })
     },
     requestConsumeObtain() {
       api.requestConsumeObtain(this.channelId, this.receiver.id).then( res => {
@@ -183,6 +201,7 @@ export default {
           // 不需要支付
           case 1:
             // 跳转到最后一个页面
+            this.$router.push(`/consume_obtain_success/${orderId}`)
             break;
           // 需要支付，拉起回调
           case 2:
@@ -195,20 +214,23 @@ export default {
                 signType: wxPayment.signType,
                 paySign: wxPayment.paySign,
                 success: (res) => {
-                  console.log(res)
+                  if ( res.errMsg === 'chooseWXPay:ok' ) {
+                    // 支付成功
+                    this.$router.push(`/consume_obtain_success/${orderId}`)
+                  }
                 },
                 fail: (err) => {
-                  console.log(err)
+                  this.$vux.toast.text(err.message, 'middle')
                 },
                 cancel: () => {
                   // 用户取消支付
                 },
                 complete: () => {
-                  console.log('完成')
+                  console.log('支付完成')
                 }
               })
             } catch(e) {
-              console.log(e)
+              console.error(e)
             }
             break;
         }

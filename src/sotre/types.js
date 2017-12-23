@@ -3,17 +3,15 @@ export const UPDATE_LOADING_STATE = 'update_loading_state'
 
 export const USER_AUTH_TOKEN_UPDATE = 'user_auth_token_update'
 
-export const MY_ADDRESS_ADDED = ''
+export const MY_ADDRESS_ADDED = 'my_address_added'
 
-export const MY_ORDERS_LOADED = ''
+export const MY_ORDERS_LOADED = 'my_order_loaded'
 
-export const MY_ADDRESS_DELETE_OK = ''
+export const MY_ADDRESS_DELETED = 'my_address_deleted'
 
-export const MY_ADDRESS_DELETE_FAIL = ''
+export const MY_ADDRESS_UPDATED = 'my_address_updated'
 
-export const MY_ADDRESS_UPDATED_FAIL = ''
-
-export const MY_ADDRESS_UPDATED_OK = 'my_address_updated'
+export const MY_ADDRESS_PRIMARY_UPDATED = 'my_address_primary_updated'
 
 export const MY_ADDRESSES_LOADED = 'my_addresses_loaded'
 

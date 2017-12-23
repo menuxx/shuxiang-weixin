@@ -1,9 +1,18 @@
 <template>
     <div class="sx-container">
 
+      <div v-transfer-dom>
+        <x-dialog v-model="showEditAddressDialog" style="padding: 10px;">
+          <cell :title="editAddressDialogTitle" @click.native="showEditAddressDialog = false">
+            <img width="20" style="display:block;margin-right:5px;" src="../../assets/close-empty.svg" />
+          </cell>
+          <NewAddressPanel ref="editAddressPanel" @submit="onAddressDataSubmit" />
+        </x-dialog>
+      </div>
+
         <div class="sx-address-list">
 
-            <div class="sx-address-item" v-for="address in addresses" :key="address.id">
+            <div class="sx-address-item" v-for="(address, index) in addresses" :key="address.id">
                 <div class="sx-address-item_view">
                     <div class="p1">
                         <div class="line1">
@@ -19,9 +28,9 @@
                     </div>
                 </div>
                 <div class="sx-bottom-bar">
-                    <check-icon>设置默认</check-icon>
+                    <check-icon @click.native="onAddressPrimary(index)" :value="address.primary == 1">设置默认</check-icon>
                     <div class="bar-btn-group">
-                        <a class="btn-item-edit" @click="onEditAddress(index)">
+                        <a class="btn-item-edit" @click="onShowEditAddressDialog(index)">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                             编辑
                         </a>
@@ -37,12 +46,12 @@
 
         <flexbox>
             <flexbox-item>
-                <x-button type="warn" @click="onAddNewAddress">
+                <x-button type="warn" @click.native="onShowAddNewAddressDialog">
                     <i class="fa fa-plus" aria-hidden="true"></i> 手动添加
                 </x-button>
             </flexbox-item>
             <flexbox-item>
-                <x-button type="primary" @click="onAddNewAddressFromWeiXin">
+                <x-button type="primary" @click.native="onAddNewAddressFromWeiXin">
                     <i class="fa fa-weixin" aria-hidden="true"></i> 微信导入
                 </x-button>
             </flexbox-item>
@@ -51,40 +60,169 @@
     </div>
 </template>
 <style lang="scss" scoped>
-    @import './EditAddress';
+  @import './EditAddress';
+  .sx-address-list {
 
-    .sx-address-list {
-
-    }
+  }
 </style>
 <script>
-	import {CheckIcon, Flexbox, FlexboxItem, XButton} from 'vux'
-
+	import { Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, TransferDomDirective as TransferDom } from 'vux'
+  import NewAddressPanel from '@/components/EditAddress/NewAddressPanel'
+  import { mapState, mapMutations, mapActions } from 'vuex'
+  import * as api from '../../http/api'
+  import * as types from '../../sotre/types'
+  import isEmpty from 'is-empty'
 	export default {
-		components: { CheckIcon, Flexbox, FlexboxItem, XButton },
+    directives: { TransferDom },
+		components: { Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, NewAddressPanel },
 		data() {
-			return {}
+			return {
+			  editAddressDialogTitle: '',
+        showEditAddressDialog: false
+      }
 		},
+    beforeRouteEnter (to, from, next) {
+        api.getMyAddresses().then( res => {
+          next(vm => {
+            vm.myAddressLoaded(res.data)
+          })
+        })
+    },
+    computed: {
+      ...mapState({
+        addresses: state => state.addresses
+      })
+    },
 		methods: {
+      ...mapActions(['addNewAddress', 'delAddress', 'setPrimaryAddress', 'updateAddress']),
+      ...mapMutations({
+        myAddressLoaded: types.MY_ADDRESSES_LOADED
+      }),
 			onApplyAddress() {
-
+        this.$router.push('/')
       },
 			onAddNewAddressFromWeiXin() {
-
+        /**
+         * 返回值 说明
+         errMsg 获取编辑收货地址成功返回“openAddress:ok”。
+         userName 收货人姓名。
+         postalCode 邮编。
+         provinceName 国标收货地址第一级地址（省）。
+         cityName 国标收货地址第二级地址（市）。
+         countryName 国标收货地址第三级地址（国家）。
+         detailInfo 详细收货地址信息。
+         nationalCode 收货地址国家码。
+         telNumber 收货人手机号码。
+         */
+        this.$wechat.openAddress({
+          success: (res) => {
+            if ( res.errMsg === "openAddress:ok" ) {
+              this.addNewAddress({
+                city: res.cityName,
+                country: res.countryName,
+                province: res.provinceName,
+                postalCode: res.postalCode,
+                receiverName: res.userName,
+                detailInfo: res.detailInfo,
+                phoneNumber: res.telNumber
+              }).then(res => {
+                if ( !isEmpty(res.id) ) {
+                  this.$vux.toast.show({
+                    text: '添加完成'
+                  })
+                } else {
+                  this.$vux.toast.show({
+                    text: '添加出现问题: ' + res.message
+                  })
+                }
+              })
+            } else {
+              console.log("返回了不正确的状态", res)
+            }
+          },
+          cancel: () => {
+            console.log("取消了地址选择")
+          }
+        })
       },
-			//
-			onAddNewAddress() {
-
-			},
-      onUpdateAddress() {
-
+      onShowAddNewAddressDialog() {
+        this.editAddressDialogTitle = "添加收货地址"
+        this.$refs.editAddressPanel.setAddressData(null)
+        this.showEditAddressDialog = true
       },
-      //
-			onEditAddress() {
-
+			// 添加自定义地址
+      onAddressDataSubmit({address, type}) {
+        if ( type === 0 ) {
+          // type = 2 属于 value 为空后 更新
+          this.addNewAddress(address).then(res => {
+            if ( !isEmpty(res.id) ) {
+              this.showEditAddressDialog = false
+              this.$vux.toast.show({
+                text: '添加完成'
+              })
+            } else {
+              this.$vux.toast.show({
+                text: '添加出现问题: ' + res.message
+              })
+            }
+          })
+          // type = 1 属于 value 被填充后 更新
+        } else if ( type === 1 ) {
+          this.updateAddress(address).then(res => {
+            if ( res.code === 1 ) {
+              this.showEditAddressDialog = false
+              this.$vux.toast.show({
+                text: '更新完成'
+              })
+            } else {
+              this.$vux.toast.show({
+                text: '更新出现问题: ' + res.message
+              })
+            }
+          })
+        }
 			},
+      onShowEditAddressDialog(index) {
+        this.$refs.editAddressPanel.setAddressData( this.addresses[index])
+        this.editAddressDialogTitle = "编辑收货地址"
+        this.showEditAddressDialog = true
+      },
+      // 是指默认地址
+      onAddressPrimary(index) {
+        var address = this.addresses[index]
+        this.setPrimaryAddress(address.id).then( res => {
+          if ( res.data.code > 0 ) {
+            console.log("设置完成")
+          } else {
+            this.$vux.toast.show({
+              text: '设置错误: ' + res.data.msg
+            })
+          }
+        })
+      },
       // 删除地址
-			onDelAddress() {
+			onDelAddress(index) {
+        var address = this.addresses[index]
+        this.$vux.confirm.show({
+          content: "确认删除改地址吗?",
+          confirmText: '删除',
+          onCancel : () => {
+            console.log("取消了删除")
+          },
+          onConfirm: () => {
+            this.delAddress(address.id).then(res => {
+              if ( res.data.code === 1 ) {
+                this.$vux.toast.show({
+                  text: '删除完成'
+                })
+              } else {
+                this.$vux.toast.show({
+                  text: '删除出现错误'
+                })
+              }
+            })
+          }
+        })
 
 			}
 		}

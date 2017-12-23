@@ -46,7 +46,40 @@ export default {
 		  }
    */
   // 更新收货人信息
-  [types.MY_RECEIVER_ADDRESS_UPDATE] (state, payload) {
-    state.channelOrder.receiver = payload
+  [types.MY_RECEIVER_ADDRESS_UPDATE] (state, receiverAddr) {
+    state.channelOrder.receiver = receiverAddr
+  },
+  // 地址更新
+  [types.MY_ADDRESS_UPDATED] (state, updatedAddr) {
+    state.addresses.forEach( (adr, index) => {
+      if ( adr.id === updatedAddr.id ) {
+        state.addresses[index] = updatedAddr
+      }
+    })
+  },
+  [types.MY_ADDRESSES_LOADED] (state, addresses) {
+    state.addresses = addresses
+  },
+  [types.MY_ADDRESS_ADDED] (state, newAddress) {
+    state.addresses.push(newAddress)
+  },
+  // 更新默认地址数据
+  [types.MY_ADDRESS_PRIMARY_UPDATED] (state, updateAddressId) {
+    state.addresses.forEach( (addr, index) => {
+      if ( addr.primary === 1 ) {
+        state.addresses[index].primary = 0
+      }
+      if ( addr.id === updateAddressId ) {
+        state.addresses[index].primary = 1
+      }
+    })
+  },
+  [types.MY_ADDRESS_DELETED] (state, addressId) {
+    // 状态删除
+    state.addresses.forEach( (adr, index) => {
+      if ( adr.id === addressId ) {
+        state.addresses.splice(index, 1)
+      }
+    })
   }
 }

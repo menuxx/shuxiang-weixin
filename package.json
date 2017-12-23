@@ -5,7 +5,7 @@
   "author": "yinchangsheng <ychangsheng@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --public wxtest.qurenjia.com --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --inline --progress --public wxdev.qurenjia.com --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "build": "node build/build.js"
   },

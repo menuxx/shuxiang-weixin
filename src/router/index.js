@@ -8,6 +8,7 @@ import * as auth from '../http/auth'
 import * as weixin from '../weixin'
 import {getSessionTokenByCode, refreshSessionToken} from '../http/api'
 import config from '../config'
+import {isProd} from '../env'
 
 // import HomePage from '@/components/HomePage/HomePage'
 // import ChannelItem from '@/components/ChannelItem/ChannelItem'
@@ -38,7 +39,7 @@ const router = new Router({
     },
     {
       // 渠道书籍页面
-      path: '/channel_item/:channelId',
+      path: '/channels/:channelId/item',
       meta: { needAuth: true },
       component: function (resolve) {
         require(['../components/ChannelItem/ChannelItem'], resolve)
@@ -62,7 +63,7 @@ const router = new Router({
     },
     {
       // 成功抢购一本书
-      path: '/consume_obtain_success/:itemId',
+      path: '/consume_obtain_success/:channelId',
       meta: { needAuth: true },
       component: function (resolve) {
         require(['../components/ConsumeObtainSuccess/ConsumeSuccess'], resolve)
@@ -99,35 +100,6 @@ function clearQueryWithUrl(argName, code, url) {
 var timeId = null
 
 // 如果一个路由不能再 2 内完成，就显示加载
-router.beforeEach((to, from, next) => {
-
-  try {
-
-    timeId = setTimeout(function () {
-      store.commit(types.UPDATE_LOADING_STATE, { isLoading: true })
-    }, 2000)
-
-    function wxInitSuccess() {
-      // 量秒内不能完成跳转，就显示 loading
-      console.log('weixin-jspai: init successfully')
-      next()
-    }
-
-    function wxInitFail(err) {
-      alert('出错了，微信初始化失败:' + err.message)
-    }
-
-    var wxConfig = weixin.getWeixinConfig()
-
-    if ( !isEmpty(wxConfig) ) {
-      weixin.initConfig(Vue.wechat, wxConfig).then(wxInitSuccess, wxInitFail)
-    } else {
-      weixin.getWeixinConfigSync(Vue.wechat, location.href).then(wxInitSuccess, wxInitFail)
-    }
-  } catch (e) {
-    console.error(e)
-  }
-})
 
 router.afterEach((to) => {
   // 解除倒计时
@@ -182,7 +154,13 @@ router.beforeEach((to, from, next) => {
             })
           } else {
             // 跳转到微信的授权
-            location.href = auth.buildAuthAuthorizeUrl(config.WeiXin.mpAppId, location.href)
+            if ( !isProd() ) {
+              // 跳转到中间授权店，为该域名 回到 code ，只会回调到 wxdev.qurenjia.com 这个域名商
+              location.href = auth.buildAuthAuthorizeUrl(config.WeiXin.mpAppId, config.Domain.AuthEntryPointUrl + location.hash)
+            } else {
+              // 生产环境正常流程
+              location.href = auth.buildAuthAuthorizeUrl(config.WeiXin.mpAppId, location.href)
+            }
             return next(new Error('还没有登录吧，快去授权', 401))
           }
         } else {
@@ -208,6 +186,41 @@ router.beforeEach((to, from, next) => {
     }
   }
   next()
+})
+
+router.beforeEach((to, from, next) => {
+
+  try {
+
+    weixin.removeWeiXinConfig()
+
+    timeId = setTimeout(function () {
+      store.commit(types.UPDATE_LOADING_STATE, { isLoading: true })
+    }, 2000)
+
+    function wxInitSuccess() {
+      // 量秒内不能完成跳转，就显示 loading
+      console.log('weixin-jspai: init successfully')
+      next()
+    }
+
+    function wxInitFail(err) {
+      alert('出错了，微信初始化失败:' + err.message)
+    }
+
+    var wxConfig = weixin.getWeiXinConfig()
+
+    console.log('weixin-jspai: config', wxConfig)
+
+    if ( !isEmpty(wxConfig) ) {
+      weixin.initConfig(Vue.wechat, wxConfig).then(wxInitSuccess, wxInitFail)
+    } else {
+      console.log('weixin-jspai => url:' + location.href)
+      weixin.getWeiXinConfigSync(Vue.wechat, location.href).then(wxInitSuccess, wxInitFail)
+    }
+  } catch (e) {
+    console.error(e)
+  }
 })
 
 router.onError((err) => {

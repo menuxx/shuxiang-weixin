@@ -61,7 +61,7 @@ export const getMyAuthToken = () => {
     if ( isEmpty(data) ) { return null }
     if ( isEmpty(data.meta) ) { return null }
     if ( Date.now() - data.meta.createAt > 7200 * 1000  ) {
-      delete localStorage.removeItem(AUTHTOKEN_STORAGE_KEY)
+      localStorage.removeItem(AUTHTOKEN_STORAGE_KEY)
       return null
     } else {
       return data.data

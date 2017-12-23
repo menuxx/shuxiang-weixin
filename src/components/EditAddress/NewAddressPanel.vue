@@ -28,10 +28,12 @@ import { Flexbox, FlexboxItem, Group, Grid, GridItem, Cell, XInput, XTextarea, X
 export default {
   components: { Flexbox, FlexboxItem, Group, Grid, GridItem, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data },
   data() {
+
     return {
 
       saveBtnDisable: true,
 
+      addressId: null,
       phoneNumber: '',
       receiverName: '',
       addressAreas: [],
@@ -40,7 +42,6 @@ export default {
       province: '',
       city: '',
       postalCode: '',
-
       detailInfo: '',
 
 
@@ -75,16 +76,47 @@ export default {
       this.country = areas[2]
       this.postalCode = this.addressAreas[2]
     },
+    setAddressData(address) {
+      if (address) {
+        this.addressId = address.id
+        this.receiverName = address.receiverName
+        this.phoneNumber = address.phoneNumber
+        this.postalCode = address.postalCode
+        this.detailInfo = address.detailInfo
+        this.province = address.province
+        this.city = address.city
+        this.country = address.country
+        this.addressAreas = [address.province, address.city, address.country]
+      } else {
+        this.addressId = null
+        this.receiverName = ''
+        this.phoneNumber = ''
+        this.postalCode = ''
+        this.detailInfo = ''
+        this.province = ''
+        this.city = ''
+        this.country = ''
+        this.addressAreas = []
+      }
+    },
     // 确认提交
     onSubmit() {
+      var type = 0
+      if (!isEmpty(this.addressId) ) {
+        type = 1
+      }
       this.$emit('submit', {
-        phoneNumber: this.phoneNumber,
-        receiverName: this.receiverName,
-        country: this.country,
-        province: this.province,
-        city: this.city,
-        postalCode: this.postalCode,
-        detailInfo: this.detailInfo
+        address: {
+          id: this.addressId,
+          phoneNumber: this.phoneNumber,
+          receiverName: this.receiverName,
+          country: this.country,
+          province: this.province,
+          city: this.city,
+          postalCode: this.postalCode,
+          detailInfo: this.detailInfo
+        },
+        type: type
       })
     }
   }
