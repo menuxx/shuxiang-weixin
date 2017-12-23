@@ -191,7 +191,7 @@
       onAddressPrimary(index) {
         var address = this.addresses[index]
         this.setPrimaryAddress(address.id).then( res => {
-          if ( res.data.code > 0 ) {
+          if ( res.code > 0 ) {
             console.log("设置完成")
           } else {
             this.$vux.toast.show({
@@ -211,7 +211,7 @@
           },
           onConfirm: () => {
             this.delAddress(address.id).then(res => {
-              if ( res.data.code === 1 ) {
+              if ( res.code === 1 ) {
                 this.$vux.toast.show({
                   text: '删除完成'
                 })
