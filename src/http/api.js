@@ -69,7 +69,7 @@ export const updateMyAddress = (addressId, address) => {
 }
 
 export const getMyAddresses = () => {
-  return http.get(LoadMyAddresses.replace('{addressId}', addressId))
+  return http.get(LoadMyAddresses)
 }
 
 export const addNewAddress = (address) => {

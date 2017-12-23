@@ -2,13 +2,14 @@ import axios from 'axios'
 import store from '../sotre/index'
 import * as types from '../sotre/types'
 import router from '../router/index'
+import {Domain} from '../config'
 
 // axios 配置
 axios.defaults.timeout = 5000 // 5秒超时
-axios.defaults.baseURL = "http://wxtest.qurenjia.com/api"
+axios.defaults.baseURL = Domain.APIBaseUrl
 // http request 拦截器
-// api 认证
 
+// api 认证
 axios.interceptors.request.use(config => {
         var {auth} = store.state
         if (auth.token) {

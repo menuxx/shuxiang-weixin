@@ -82,11 +82,11 @@
       }
 		},
     beforeRouteEnter (to, from, next) {
-        api.getMyAddresses().then( res => {
-          next(vm => {
-            vm.myAddressLoaded(res.data)
-          })
+      api.getMyAddresses().then( res => {
+        next(vm => {
+          vm.myAddressLoaded(res.data)
         })
+      })
     },
     computed: {
       ...mapState({
