@@ -209,5 +209,5 @@
 </script>
 
 <style scoped lang="scss">
-  @import "./ChannelItem";
+  @import "VChannelItem";
 </style>

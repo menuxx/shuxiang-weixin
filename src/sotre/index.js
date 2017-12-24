@@ -1,3 +1,5 @@
+import {isProd} from '../env'
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -62,13 +64,11 @@ const state = {
 	orders: []
 }
 
-console.log('process.env.NODE_ENV: ' + process.env.NODE_ENV)
-
 export default new Vuex.Store({
     state,
     actions,
     getters,
     plugins,
     mutations,
-    strict: process.env.NODE_ENV !== 'production'
+    strict: isProd()
 })

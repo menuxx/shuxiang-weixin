@@ -6,6 +6,9 @@ import App from './App'
 import router from './router'
 import store from './sotre'
 import http from './http'
+import './lib/type'
+
+console.log('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
 if (process.env.NODE_ENV === 'development') {
   var VConsole = require('vconsole')
@@ -54,6 +57,5 @@ new Vue({
 	  http,
     router,
     store,
-    template: '<App/>',
-    components: {App}
+    render: h => h(App)
 })

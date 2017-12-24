@@ -24,6 +24,14 @@ Vue.use(Router)
 const router = new Router({
   routes: [
     {
+      // 分享图片
+      path: '/v_channels/:channelId/share_image',
+      name: 'v_channel_share_image',
+      component: function(resolve) {
+        require(['../components/VChannelShareImage/VChannelShareImage'], resolve)
+      }
+    },
+    {
       path: '/test1',
       component: function(resolve) {
         require(['../components/Test/Test'], resolve)
@@ -32,6 +40,7 @@ const router = new Router({
     {
       // 首页
       path: '/',
+      name: 'index',
       meta: { needAuth: true },
       component: function(resolve) {
         require(['../components/HomePage/HomePage'], resolve)
@@ -40,30 +49,34 @@ const router = new Router({
     {
       // 渠道书籍页面
       path: '/channels/:channelId/item',
+      name: 'channel_item',
       meta: { needAuth: true },
       component: function (resolve) {
-        require(['../components/ChannelItem/ChannelItem'], resolve)
+        require(['../components/VChannelItem/VChannelItem'], resolve)
       }
     },
     {
       // 渠道书籍页面
       path: '/channels/:channelId/partners',
+      name: 'channel_partners',
       meta: { needAuth: true },
       component: function (resolve) {
-        require(['../components/ChannelItem/PartnerList'], resolve)
+        require(['../components/VChannelItem/PartnerList'], resolve)
       }
     },
     {
       // 持有一个 item ，待填写 address ，支付并领取
-      path: '/obtain_channel_item/:channelId',
+      path: '/obtain_channel/:channelId/item',
+      name: 'obtain_channel_item',
       meta: { needAuth: true },
       component: function (resolve) {
-        require(['../components/ObtainChannelItem/ObtainChannelItem'], resolve)
+        require(['../components/ObtainVChannelItem/ObtainVChannelItem'], resolve)
       }
     },
     {
       // 成功抢购一本书
       path: '/consume_obtain_success/:channelId',
+      name: 'consume_obtain_success',
       meta: { needAuth: true },
       component: function (resolve) {
         require(['../components/ConsumeObtainSuccess/ConsumeSuccess'], resolve)
@@ -78,6 +91,7 @@ const router = new Router({
       // 用户收货地址管理
       path: '/user_address',
       meta: { needAuth: true },
+      name: 'user_address',
       component: function (resolve) {
         require(['../components/EditAddress/EditAddress'], resolve)
       }
@@ -86,6 +100,7 @@ const router = new Router({
       // 订单列表
       path: '/order_list',
       meta: { needAuth: true },
+      name: 'order_list',
       component: function (resolve) {
         require(['../components/OrderList/OrderList'], resolve)
       }
