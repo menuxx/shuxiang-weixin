@@ -31,7 +31,7 @@ export default {
 	/**
 	 * 获取我的地址列表
 	 */
-	// loadMyAddress({commit}) {
+	// loadMyAddresses({commit}) {
 	// 	return api.getMyAddresses().then( addresses => {
 	// 		commit(types.MY_ADDRESSES_LOADED, addresses)
 	// 		return addresses
@@ -85,5 +85,14 @@ export default {
 			commit(types.MY_ORDERS_LOADED, orders)
 			return orders
 		})
-	}
+	},
+
+  /**
+   * 根据订单id获取订单详情
+   */
+  getOrderDetailsById({commit}, orderId) {
+	  return api.getOrderDetailsById(orderId).then( res => {
+	    return res.data
+    })
+  }
 }

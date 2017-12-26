@@ -23,8 +23,8 @@
                             {{ address.province }}{{ address.city }}{{address.country}}{{address.detailInfo}}
                         </div>
                     </div>
-                    <div class="p2">
-                        <a class="sx-btn-apply" @click="onApplyAddress">使用</a>
+                    <div class="p2" v-if="redirectPath">
+                        <a class="sx-btn-apply" @click="onApplyAddress(index)">使用</a>
                     </div>
                 </div>
                 <div class="sx-bottom-bar">
@@ -72,18 +72,28 @@
   import * as api from '../../http/api'
   import * as types from '../../sotre/types'
   import isEmpty from 'is-empty'
+  import qs from 'querystring'
 	export default {
     directives: { TransferDom },
 		components: { Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, NewAddressPanel },
 		data() {
 			return {
+        redirectPath: null,
 			  editAddressDialogTitle: '',
         showEditAddressDialog: false
       }
 		},
     beforeRouteEnter (to, from, next) {
+      var {redirectPath} = to.query
       api.getMyAddresses().then( res => {
         next(vm => {
+          // 移除 uri 上面的 addressId
+          if (!isEmpty(redirectPath)) {
+            var path = redirectPath.substr(0, redirectPath.indexOf('?'))
+            var query = qs.parse(redirectPath.substr(redirectPath.indexOf('?') + 1))
+            delete query['addressId']
+            vm.redirectPath = path + '?' + qs.stringify(query)
+          }
           vm.myAddressLoaded(res.data)
         })
       })
@@ -98,8 +108,9 @@
       ...mapMutations({
         myAddressLoaded: types.MY_ADDRESSES_LOADED
       }),
-			onApplyAddress() {
-        this.$router.push('/')
+			onApplyAddress(index) {
+        var address = this.addresses[index]
+        this.$router.push(this.redirectPath + `?addressId=${address.id}`)
       },
 			onAddNewAddressFromWeiXin() {
         /**

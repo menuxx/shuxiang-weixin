@@ -10,7 +10,8 @@
       </x-dialog>
     </div>
 
-    <div class="sx-address-item">
+    <div class="sx-address-section">
+      <div class="sx-address-item" v-if="isShowAddressSection">
         <div class="sx-address-item_view">
           <div class="p1">
             <div class="line1">
@@ -22,18 +23,19 @@
             </div>
           </div>
           <div class="p2">
-            <a class="sx-btn-apply">
+            <a class="sx-btn-apply" @click="onChooseMoreAddress">
               <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </a>
           </div>
         </div>
+      </div>
     </div>
 
     <group gutter="0">
-      <cell @click.native="onChooseSysAddress" title="手动添加收货地址" is-link :border-intent="false">
+      <cell @click.native="onChooseSysAddress" :title="addressLabels.sys" is-link :border-intent="false">
         <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/plus.svg" />
       </cell>
-      <cell @click.native="onChooseWxAddress" title="一键获取微信地址" is-link :border-intent="false" :disabled="false" :is-loading="true">
+      <cell @click.native="onChooseWxAddress" :title="addressLabels.weixin" is-link :border-intent="false" :disabled="false" :is-loading="wxChooseBtnLoading">
         <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/wechat.svg" />
       </cell>
     </group>
@@ -75,7 +77,7 @@
     }
   }
 }
-.sx-address-item:after {
+.sx-address-section:after {
   content: ' ';
   display: block;
   width: 100%;
@@ -122,10 +124,10 @@ import isEmpty from 'is-empty'
 import {getLoopRefId, setLoopRefId, debounceLoopChannelState} from '../../obtainItem'
 
 function getAddress(addressId) {
-  if ( isEmpty(addressId) ) {
+  if ( isEmpty(addressId) || isNaN(addressId) ) {
     return api.getMyPrimaryAddress()
   } else {
-    return api.getMyAddresses(addressId)
+    return api.getMyAddress(addressId)
   }
 }
 
@@ -134,7 +136,13 @@ export default {
   components : { XButton, Divider, Grid, GridItem, Cell, CellBox, Group, XDialog, NewAddressPanel },
   data() {
     return {
-      showAddAddressDialog: false
+      isShowAddressSection: false,
+      addressLabels: {
+        sys: '手动添加收货地址',
+        weixin: '一键获取微信地址'
+      },
+      showAddAddressDialog: false,
+      wxChooseBtnLoading: false
     }
   },
   computed: mapState({
@@ -151,19 +159,21 @@ export default {
     var {channelId} = to.params
     var {addressId} = to.query
     channelId = parseInt(channelId, 10)
-    addressId = parseInt(addressId, 10)
+    console.log('beforeRouteEnter:addressId', addressId)
     Promise.all([
       api.getVipChannelItem(channelId),
       getAddress(addressId)
     ]).then(res => {
       var channelItem = res[0].data
-      var primaryAddress = res[1].data
+      var receiverAddress = res[1].data
       // 如果能够获取到地址， 就直接填充改地址
         next(vm => {
-          vm.updateReceiver( primaryAddress );
+          vm.isShowAddressSection = !isEmpty(receiverAddress.phoneNumber) && !isEmpty(receiverAddress.receiverName)
+          vm.updateReceiver( receiverAddress );
           vm.channelItemLoaded( channelItem );
         })
     }, err => {
+      console.log(err)
       // 显示地址选择
       next(vm => {
         vm.onChooseSysAddress()
@@ -175,10 +185,57 @@ export default {
       channelItemLoaded: types.CHANNEL_ITEM_LOADED,
       updateReceiver: types.MY_RECEIVER_ADDRESS_UPDATE
     }),
+    onChooseMoreAddress() {
+      this.$router.push({ name: 'user_address', query: { redirectPath: this.$router.currentRoute.fullPath } })
+    },
     onChooseSysAddress() {
       this.showAddAddressDialog = true
     },
     onChooseWxAddress() {
+      /**
+       * 返回值 说明
+       errMsg 获取编辑收货地址成功返回“openAddress:ok”。
+       userName 收货人姓名。
+       postalCode 邮编。
+       provinceName 国标收货地址第一级地址（省）。
+       cityName 国标收货地址第二级地址（市）。
+       countryName 国标收货地址第三级地址（国家）。
+       detailInfo 详细收货地址信息。
+       nationalCode 收货地址国家码。
+       telNumber 收货人手机号码。
+       */
+      this.wxChooseBtnLoading = true
+      this.$wechat.openAddress({
+        success: (res) => {
+          if ( res.errMsg === "openAddress:ok" ) {
+            this.addNewAddress({
+              city: res.cityName,
+              country: res.countryName,
+              province: res.provinceName,
+              postalCode: res.postalCode,
+              receiverName: res.userName,
+              detailInfo: res.detailInfo,
+              phoneNumber: res.telNumber
+            }).then(res => {
+              if ( !isEmpty(res.id) ) {
+                this.wxChooseBtnLoading = false
+                vm.updateReceiver( res );
+                this.$vux.toast.show({ text: '添加完成' })
+              } else {
+                this.$vux.toast.show({
+                  text: '添加出现问题: ' + res.message
+                })
+              }
+            })
+          } else {
+            console.log("返回了不正确的状态", res)
+          }
+        },
+        cancel: () => {
+          this.wxChooseBtnLoading = false
+          console.log("取消了地址选择")
+        }
+      })
     },
     /**
      * 档地址被创建的时候
@@ -187,6 +244,7 @@ export default {
       api.addNewAddress(address).then( res => {
         var address = res.data
         if ( !isEmpty(address.id) ) {
+          this.updateReceiver(address)
           // 保存成功关闭 dialog
           this.showAddAddressDialog = false
         } else {
@@ -197,11 +255,12 @@ export default {
     requestConsumeObtain() {
       api.requestConsumeObtain(this.channelId, this.receiver.id).then( res => {
         var {code, orderId, wxPayment} = res.data
+        console.log(res)
         switch (code) {
           // 不需要支付
           case 1:
             // 跳转到最后一个页面
-            this.$router.push(`/consume_obtain_success/${orderId}`)
+            this.$router.push({ name: 'consume_obtain_success', params: { orderId } })
             break;
           // 需要支付，拉起回调
           case 2:
@@ -216,11 +275,12 @@ export default {
                 success: (res) => {
                   if ( res.errMsg === 'chooseWXPay:ok' ) {
                     // 支付成功
-                    this.$router.push(`/consume_obtain_success/${orderId}`)
+                    this.$router.push( { name: 'consume_obtain_success', params: { orderId } } )
                   }
                 },
                 fail: (err) => {
-                  this.$vux.toast.text(err.message, 'middle')
+                  console.error(err)
+                  this.$vux.toast.text(err.errMsg, 'middle')
                 },
                 cancel: () => {
                   // 用户取消支付

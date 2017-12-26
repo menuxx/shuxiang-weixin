@@ -47,6 +47,7 @@ const state = {
     // 书籍
     item: null
   },
+  consumeChannelOrderDetails: null,
 	// 抢购订单
 	channelOrder: {
     	// 收货人信息

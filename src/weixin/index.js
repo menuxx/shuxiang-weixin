@@ -42,7 +42,7 @@ var JS_API_LIST = ['openAddress', 'chooseWXPay', 'onMenuShareAppMessage', 'onMen
 export const initConfig = (wx, config) => {
 
   wx.config(Object.assign({}, {
-    debug: process.env.NODE_ENV === 'development',
+    // debug: process.env.NODE_ENV === 'development',
     jsApiList: JS_API_LIST
   }, config))
 

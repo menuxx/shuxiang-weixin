@@ -85,24 +85,25 @@
       var {errCode, loopRefId, messageId, errMsg} = res.data
       // 满足轮询状态开始轮训
       if (errCode === 0 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
-        setLoopRefId(loopRefId)
-        return debounceLoopChannelState(channelId, loopRefId).then(stateCode => {
+        setLoopRefId(channelId, loopRefId)
+        return debounceLoopChannelState(channelId, loopRefId, function loopFn (stateCode, next) {
           // 成功抢到
           if (stateCode === States.Obtain) {
-            return States.Obtain
+            return next(States.Obtain)
           } else {
             // 如果错误就终止轮询
             if ( stateCode === States.Fail ) {
-              return States.Fail
+              return next(States.Fail)
             }
             // 只要未结束，只要没有已经消费国，就可以继续抢购
-            if ( stateCode !== States.Finish || stateCode !== States.ObtainConsumeAgain || stateCode !== States.ObtainConsumed) {
-              // 轮询知道有期待的结果返回
-              return debounceLoopChannelFn()
+            if ( stateCode === States.NoObtain || stateCode !== States.Finish || stateCode !== States.ObtainConsumeAgain || stateCode !== States.ObtainConsumed ) {
+              // 轮询直到有期待的结果返回，否则继续轮训
+              // 不调用 next 会导致 loopFn 一至被调用
+              return;
             }
             // 否则返回最终状态码
             else {
-              return stateCode
+              return next(stateCode)
             }
           }
         })
@@ -130,14 +131,14 @@
         ])
         .then( res => {
           next(vm => {
-            // 合并数据
-            // 如果存在 长轮训 id 就继续之前的操作
-            var loopRefId = getLoopRefId()
-            if ( !isEmpty(loopRefId) ) {
-              vm.continueLoopChannelState( loopRefId, channelId )
-            }
             // mutation 更新 store 中的 channelItem
             vm.channelItemLoaded( res[0].data )
+            // 合并数据
+            // 如果存在 长轮训 id 就继续之前的操作
+            var loopRefId = getLoopRefId(channelId)
+            if ( !isEmpty(loopRefId) ) {
+                vm.continueLoopChannelState( loopRefId, channelId )
+            }
           })
         })
       } else {
@@ -172,7 +173,7 @@
        * 继续长轮训状态
        */
       continueLoopChannelState(loopRefId, channelId) {
-        loopChannelState(loopRefId, channelId).then( stateCode => {
+        loopChannelState(channelId, loopRefId).then( stateCode => {
           this.requestObtainResult(stateCode)
         })
       },
@@ -183,7 +184,7 @@
           // 成功持有
           case States.Obtain:
             // 提交状态
-            this.$router.push({path: `/obtain_channel_item/${this.channelId}`})
+            this.$router.push({ name: 'obtain_channel_item', params: { channelId: this.channelId } })
             break;
           // 已消费(已经抢到了)
           case States.ObtainConsumed:

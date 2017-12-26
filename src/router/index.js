@@ -75,7 +75,7 @@ const router = new Router({
     },
     {
       // 成功抢购一本书
-      path: '/consume_obtain_success/:channelId',
+      path: '/consume_obtain_success/:orderId',
       name: 'consume_obtain_success',
       meta: { needAuth: true },
       component: function (resolve) {

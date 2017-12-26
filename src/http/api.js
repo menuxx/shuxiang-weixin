@@ -46,7 +46,7 @@ export const fetchWeiXinConfig = (url) => {
  * @returns {AxiosPromise<any>}
  */
 export const requestConsumeObtain = (channelId, addressId) => {
-  return http.put(`/v_channel_store/${channelId}/consume`, channelId, { addressId })
+  return http.put(`/v_channel_store/${channelId}/consume`, { addressId })
 }
 
 /**
@@ -104,7 +104,11 @@ export const getMyPrimaryAddress = () => {
  * @returns {AxiosPromise<any>}
  */
 export const getMyAddress = (addressId) => {
-  return http.get(`/user_addresses/{addressId}`, addressId)
+  return http.get(`/user_addresses/${addressId}`)
+}
+
+export const getOrderDetailsById = orderId => {
+  return http.get(`orders/${orderId}`)
 }
 
 export const loadMyOrders = () => {

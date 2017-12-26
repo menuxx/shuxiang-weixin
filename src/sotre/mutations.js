@@ -81,5 +81,11 @@ export default {
         state.addresses.splice(index, 1)
       }
     })
+  },
+  /**
+   * 单个订单加载
+   */
+  [types.MY_CONSUME_ORDER_LOADED] (state, orderDetails) {
+    state.consumeChannelOrderDetails = orderDetails
   }
 }
