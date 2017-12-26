@@ -26,7 +26,7 @@ const state = {
   },
 	// 地址列表
 	addresses: [],
-  // 全书渠道
+  // 抢书渠道
   channelItem: {
     // 赠语
     giftTxt: null,
@@ -38,8 +38,10 @@ const state = {
     stock: 0,
     // 剩下的个书
     remainNum: 0,
+    // 参与者人数
+    partnerCount: 0,
     // 参与者列表, id 为 键
-    partners: {},
+    partners: [],
     // 当前打开的渠道 id
     channelId: 0,
     // 长轮询应用id
@@ -47,6 +49,7 @@ const state = {
     // 书籍
     item: null
   },
+  // 消费订单详情
   consumeChannelOrderDetails: null,
 	// 抢购订单
 	channelOrder: {

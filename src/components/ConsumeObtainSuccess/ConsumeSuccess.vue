@@ -18,9 +18,9 @@
       <div v-transfer-dom>
         <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent' }">
           <div class="share-image-wrap">
-            <CanvasShareImage />
+            <CanvasShareImage ref="shareImage" />
           </div>
-          <cell @click.native="onHideShareVChannel" primary="content" value-align="center">
+          <cell @click.native="showWithMeShareImage = false" primary="content" value-align="center">
             <img width="20" style="color: #fff;" src="../../assets/close.png" />
           </cell>
         </x-dialog>
@@ -85,7 +85,9 @@
   }
 </style>
 <script>
+  import * as config from '../../config'
   import * as types from '../../sotre/types'
+  import {cdnFullUrl} from '../../filters'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import {getOrderDetailsById} from '../../http/api'
 import { XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
@@ -116,11 +118,18 @@ export default {
         consumeChannelOrderLoaded: types.MY_CONSUME_ORDER_LOADED
       }),
       onShareVChannel() {
+        var details = this.myConsumeChannelOrderDetails
+        this.$refs.shareImage.onDraw({
+          queueNum: details.queueNum,
+          shopUrl: details.vChannel.item.shopUrl,
+          itemCoverImageUrl: cdnFullUrl(details.vChannel.item.coverImage, config.QiNiuImagePrefix.item),
+          ownerName: details.vChannel.ownerName,
+          userName: details.user.userName,
+          userAvatarUrl: details.user.avatarUrl,
+          ownerAvatarUrl: cdnFullUrl(details.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
+        })
         this.showWithMeShareImage = true
-      },
-    onHideShareVChannel() {
-      this.showWithMeShareImage = false
-    }
+      }
   }
 }
 </script>

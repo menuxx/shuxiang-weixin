@@ -2,48 +2,54 @@
 
   <div class="sx-container">
 
-    <img class="item-image" :src="coverImageUrl" :alt="item.name"/>
+    <img class="item-image" :src="channelItem.item.coverImageUrl" :alt="channelItem.item.name"/>
 
     <div class="item-author-section">
-      <p class="item-author-text">{{ giftTxt }}</p>
-      <span class="item-author-name">----{{ ownerName }}</span>
+      <p class="item-author-text">{{ channelItem.giftTxt }}</p>
+      <span class="item-author-name">----{{ channelItem.ownerName }}</span>
     </div>
 
     <div class="item-stock-section">
-      剩余 <span class="item-stock-number">{{ remainNum }}</span> 本
+      剩余 <span class="item-stock-number">{{ channelItem.remainNum }}</span> 本
     </div>
 
     <div class="obtain-partner-section">
       <span class="partner-section-title">他们都抢到了</span>
-      <div class="partner-list-horizontal" v-for="partner in partners">
-        <img class="user-avatar" :src="partner.avatarUrl" :alt="partner.userName" :key="partner.id"/>
-        <span class="more-btn" @click="popupPartnerListView">更多</span>
+      <div class="partner-list-horizontal">
+        <img class="user-avatar" v-for="partner in channelItem.partners" :src="partner.user.avatarUrl" :alt="partner.user.userName" :key="partner.user.id"/>
+        <span class="more-btn" v-if="channelItem.partners.length > 1" @click="popupPartnerListView">更多</span>
       </div>
     </div>
 
-    <div class="more-op-section">
+    <!--<div class="more-op-section">-->
 
-      <a class="sx-btn-circle btn-sm-share" @click="onShareChannel">
-        <i class="fa fa-share-alt-square" aria-hidden="true"></i>
-        <span class="btn-sm-name">分享</span>
-      </a>
+      <!--<a class="sx-btn-circle btn-sm-share" @click="onShareChannel">-->
+        <!--<i class="fa fa-share-alt-square" aria-hidden="true"></i>-->
+        <!--<span class="btn-sm-name">分享</span>-->
+      <!--</a>-->
 
-      <a class="sx-btn-circle btn-sm-poster" @click="onShowPoster">
-        <i class="fa fa-picture-o" aria-hidden="true"></i>
-        <span class="btn-sm-name">海报</span>
-      </a>
+      <!--<a class="sx-btn-circle btn-sm-poster" @click="onShowPoster">-->
+        <!--<i class="fa fa-picture-o" aria-hidden="true"></i>-->
+        <!--<span class="btn-sm-name">海报</span>-->
+      <!--</a>-->
 
-    </div>
+    <!--</div>-->
 
     <a class="btn-block-primary" @click="requestObtain">
-      「{{ ownerName }}」送出 {{ stock }} 本新书，马上抢读
+      「{{ channelItem.ownerName }}」送出 {{ channelItem.stock }} 本新书，马上抢读
     </a>
 
     <div v-transfer-dom>
       <!--  device screen height -->
       <popup v-model="showPartnerListView" height="100%">
-        <div class="popup1">
-          <PartnerListView :list="partners"/>
+        <div class="popup">
+          <div class="popup-tips">
+            已领取 {{ channelItem.partnerCount }} 本，共{{ channelItem.stock }}本
+            <a class="close-btn" @click="showPartnerListView = false">
+              <i class="fa fa-times-circle-o" aria-hidden="true"></i>
+            </a>
+          </div>
+          <PartnerListView :data="channelItem"/>
         </div>
       </popup>
     </div>
@@ -57,7 +63,7 @@
   import isEmpty from 'is-empty'
 
   import PartnerListView from './PartnerList'
-  import {Popup, TransferDomDirective as TransferDom } from 'vux'
+  import { Popup, TransferDomDirective as TransferDom } from 'vux'
 
   import {getLoopRefId, setLoopRefId, debounceLoopChannelState, loopChannelState} from '../../obtainItem'
   import store from '../../sotre'
@@ -77,42 +83,6 @@
     ConsumeFail: 6       // 消费失败
   }
 
-  /**
-   * 渠道商品抢购
-   */
-  function channelItemObtain(channelId) {
-    return http.get(api.ObtainChannelItem.replace('{channelId}', channelId)).then( res => {
-      var {errCode, loopRefId, messageId, errMsg} = res.data
-      // 满足轮询状态开始轮训
-      if (errCode === 0 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
-        setLoopRefId(channelId, loopRefId)
-        return debounceLoopChannelState(channelId, loopRefId, function loopFn (stateCode, next) {
-          // 成功抢到
-          if (stateCode === States.Obtain) {
-            return next(States.Obtain)
-          } else {
-            // 如果错误就终止轮询
-            if ( stateCode === States.Fail ) {
-              return next(States.Fail)
-            }
-            // 只要未结束，只要没有已经消费国，就可以继续抢购
-            if ( stateCode === States.NoObtain || stateCode !== States.Finish || stateCode !== States.ObtainConsumeAgain || stateCode !== States.ObtainConsumed ) {
-              // 轮询直到有期待的结果返回，否则继续轮训
-              // 不调用 next 会导致 loopFn 一至被调用
-              return;
-            }
-            // 否则返回最终状态码
-            else {
-              return next(stateCode)
-            }
-          }
-        })
-      } else {
-        return Promise.reject(new Error(errMsg))
-      }
-    })
-  }
-
   export default {
     directives: { TransferDom },
     components: { PartnerListView, Popup },
@@ -127,12 +97,13 @@
       channelId = parseInt(channelId, 10)
       if (Number.isInteger(channelId)) {
         Promise.all([
-          api.getVipChannelItem(channelId)
+          api.getVipChannelItem(channelId),
+          api.getVChannelOrders(channelId)
         ])
         .then( res => {
           next(vm => {
             // mutation 更新 store 中的 channelItem
-            vm.channelItemLoaded( res[0].data )
+            vm.channelItemLoaded({ channel: res[0].data, partner: res[1].data })
             // 合并数据
             // 如果存在 长轮训 id 就继续之前的操作
             var loopRefId = getLoopRefId(channelId)
@@ -146,14 +117,8 @@
       }
     },
     computed: mapState({
-      item: state => state.channelItem.item,
       channelId: state => state.channelItem.channelId,
-      ownerAvatarUrl: state => cdnFullUrl(state.channelItem.ownerAvatar, QiNiuImagePrefix.vipChannelAvatar),
-      giftTxt: state => state.channelItem.giftTxt, // 赠语
-      stock: state => state.channelItem.stock,  // 库存
-      remainNum: state => state.channelItem.remainNum,
-      ownerName: state => state.channelItem.ownerName,
-      partners: state => state.channelItem.partners
+      channelItem: state => state.channelItem
     }),
     methods: {
       ...mapMutations({
@@ -173,7 +138,7 @@
        * 继续长轮训状态
        */
       continueLoopChannelState(loopRefId, channelId) {
-        loopChannelState(channelId, loopRefId).then( stateCode => {
+        this.channelItemObtain(channelId).then( stateCode => {
           this.requestObtainResult(stateCode)
         })
       },
@@ -189,6 +154,7 @@
           // 已消费(已经抢到了)
           case States.ObtainConsumed:
           case States.ObtainConsumeAgain:
+            this.$vux.toast.show({ text: '已经抢到改书' })
             break;
           // 已经结束了
           case States.Finish:
@@ -199,9 +165,46 @@
         }
       },
 
+      /**
+       * 渠道商品抢购
+       */
+      channelItemObtain : (channelId) => {
+        return http.get(api.ObtainChannelItem.replace('{channelId}', channelId)).then( res => {
+          var {errCode, loopRefId, messageId, errMsg} = res.data
+          // 满足轮询状态开始轮训
+          if (errCode === 0 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
+            setLoopRefId(channelId, loopRefId)
+            return debounceLoopChannelState(channelId, loopRefId, (stateCode, next) => {
+              // 如果已经过期，就重新发起请求
+              if ( stateCode === States.FreeObtain ) {
+                next(false) // 中断上一次循环, 开始新的循环
+                return this.channelItemObtain()
+              }
+              // 成功抢到
+              if (stateCode === States.Obtain || stateCode === States.Fail || stateCode === States.Finish || stateCode === States.ObtainConsumeAgain || stateCode === States.ObtainConsumed ) {
+                return next(stateCode)
+              } else {
+                // 只要未结束，只要没有已经消费国，就可以继续抢购
+                if ( stateCode === States.NoObtain ) {
+                  // 轮询直到有期待的结果返回，否则继续轮训
+                  // 不调用 next 会导致 loopFn 一至被调用
+                  return;
+                }
+                // 否则返回最终状态码
+                else {
+                  return next(stateCode)
+                }
+              }
+            })
+          } else {
+            return Promise.reject(new Error(errMsg))
+          }
+        })
+      },
+
       // 开始抢购
       requestObtain() {
-        channelItemObtain(this.channelId).then(stateCode => {
+        this.channelItemObtain(this.channelId).then(stateCode => {
           this.requestObtainResult(stateCode)
         })
       }
@@ -211,4 +214,16 @@
 
 <style scoped lang="scss">
   @import "VChannelItem";
+  .popup-tips {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    padding: 0.1rem 0.5rem;
+    border-bottom: 1px solid #ccc;
+    .close-btn {
+      font-size: 1.5rem;
+    }
+  }
 </style>

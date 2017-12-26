@@ -14,21 +14,22 @@ export default {
     state.auth.token = payload.token
     state.auth.userInfo = payload.userInfo
   },
-	[types.CHANNEL_ITEM_LOADED] (state, payload) {
+	[types.CHANNEL_ITEM_LOADED] (state, { channel, partner }) {
     // 计数器数量
-    state.channelItem.ownerName = payload.ownerName
-    state.channelItem.ownerAvatar = payload.ownerAvatar
-    state.channelItem.giftTxt = payload.giftTxt
-    state.channelItem.channelId = payload.id
+    state.channelItem.ownerName = channel.ownerName
+    state.channelItem.ownerAvatar = channel.ownerAvatar
+    state.channelItem.giftTxt = channel.giftTxt
+    state.channelItem.channelId = channel.id
     // 参与者人数
-    state.channelItem.partners = []
+    state.channelItem.partners = partner.users
+    state.channelItem.partnerCount = partner.count
     // 得到还剩下多少本书
     // state.channelItem.remainNum = 库存数 - 订单数
-    state.channelItem.item = payload.item
+    state.channelItem.item = channel.item
     // 处理图片 url
-    state.channelItem.item.coverImageUrl = cdnFullUrl(payload.item.coverImage, QiNiuImagePrefix.item)
-
-    state.channelItem.stock = payload.stock
+    state.channelItem.item.coverImageUrl = cdnFullUrl(channel.item.coverImage, QiNiuImagePrefix.item)
+    state.channelItem.stock = channel.stock
+    state.channelItem.remainNum = channel.stock - partner.count
 	},
   /**
    * 更新我的收货人地址信息

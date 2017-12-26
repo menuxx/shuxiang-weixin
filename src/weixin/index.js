@@ -1,7 +1,34 @@
 const WEIXIN_CONFIG_KEY = '__weixin__config__'
+const SELECTED_ADDRESS_ID = '__selected_address__'
 
 import isEmpty from 'is-empty'
 import {fetchWeiXinConfig} from '../http/api'
+
+export const addressToPath = (path) => {
+  sessionStorage.setItem(SELECTED_ADDRESS_ID, JSON.stringify({ redirectPath: path }))
+}
+
+export const addressRedirectTo = (args) => {
+  var addStr = sessionStorage.getItem(SELECTED_ADDRESS_ID)
+  try {
+    var data = JSON.parse(addStr)
+    sessionStorage.setItem(SELECTED_ADDRESS_ID, JSON.stringify(args))
+    return data.redirectPath || '/'
+  } catch (e) {
+    return null
+  }
+}
+
+export const addressReturnFrom = () => {
+  var addStr = sessionStorage.getItem(SELECTED_ADDRESS_ID)
+  try {
+    return JSON.parse(addStr) || {}
+  } catch (e) {
+    return {}
+  } finally {
+    sessionStorage.removeItem(SELECTED_ADDRESS_ID)
+  }
+}
 
 // 等价对象
 export const setWeiXinConfig = (config) => {
@@ -71,9 +98,7 @@ export const initConfig = (wx, config) => {
  * 同步服务器 config
  */
 export const getWeiXinConfigSync = (wx, url)=> {
-  console.log('11111')
   return fetchWeiXinConfig(url).then(res => {
-    console.log(res.data)
     setWeiXinConfig(res.data)
     return initConfig(wx, res.data.jsApiConfig)
   }, err => {

@@ -53,7 +53,7 @@ export const debounceLoopChannelState = (channelId, loopRefId, fn) => {
   var nextFn = debounce(function () { return loopChannelState(channelId, loopRefId); }, 800)
   function _next(resolve, reject) {
     nextFn().then( res => {
-      fn(res, function (data) { isNext = 0; resolve(data); })
+      fn(res, function (data) { isNext = 0; if (data) { resolve(data); } })
       if (isNext === 1) {
         _next(resolve, reject)
       }

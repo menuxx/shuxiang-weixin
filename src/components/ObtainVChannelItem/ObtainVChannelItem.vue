@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <group gutter="0">
+    <group gutter="0" v-if="!isShowAddressSection">
       <cell @click.native="onChooseSysAddress" :title="addressLabels.sys" is-link :border-intent="false">
         <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/plus.svg" />
       </cell>
@@ -121,11 +121,18 @@ import { mapState, mapMutations } from 'vuex'
 import * as types from '../../sotre/types'
 import * as api from '../../http/api'
 import isEmpty from 'is-empty'
+import {addressToPath, addressReturnFrom} from '../../weixin'
 import {getLoopRefId, setLoopRefId, debounceLoopChannelState} from '../../obtainItem'
 
 function getAddress(addressId) {
   if ( isEmpty(addressId) || isNaN(addressId) ) {
-    return api.getMyPrimaryAddress()
+    return new Promise(function (resolve, reject) {
+      api.getMyPrimaryAddress().then( res => {
+        resolve(res)
+      }, err => {
+        resolve(err)
+      })
+    })
   } else {
     return api.getMyAddress(addressId)
   }
@@ -157,27 +164,22 @@ export default {
    */
   beforeRouteEnter (to, from, next) {
     var {channelId} = to.params
-    var {addressId} = to.query
-    channelId = parseInt(channelId, 10)
-    console.log('beforeRouteEnter:addressId', addressId)
+    var {addressId} = addressReturnFrom()
     Promise.all([
       api.getVipChannelItem(channelId),
       getAddress(addressId)
     ]).then(res => {
       var channelItem = res[0].data
-      var receiverAddress = res[1].data
+      var receiverAddressRes = res[1]
       // 如果能够获取到地址， 就直接填充改地址
         next(vm => {
-          vm.isShowAddressSection = !isEmpty(receiverAddress.phoneNumber) && !isEmpty(receiverAddress.receiverName)
-          vm.updateReceiver( receiverAddress );
           vm.channelItemLoaded( channelItem );
+          if ( !isEmpty(receiverAddressRes.data) ) {
+            var receiverAddress = receiverAddressRes.data
+            vm.isShowAddressSection = true
+            vm.updateReceiver( receiverAddress );
+          }
         })
-    }, err => {
-      console.log(err)
-      // 显示地址选择
-      next(vm => {
-        vm.onChooseSysAddress()
-      })
     })
   },
   methods: {
@@ -186,7 +188,8 @@ export default {
       updateReceiver: types.MY_RECEIVER_ADDRESS_UPDATE
     }),
     onChooseMoreAddress() {
-      this.$router.push({ name: 'user_address', query: { redirectPath: this.$router.currentRoute.fullPath } })
+      addressToPath(this.$router.currentRoute.fullPath)
+      this.$router.push({ name: 'user_address' })
     },
     onChooseSysAddress() {
       this.showAddAddressDialog = true
@@ -208,7 +211,7 @@ export default {
       this.$wechat.openAddress({
         success: (res) => {
           if ( res.errMsg === "openAddress:ok" ) {
-            this.addNewAddress({
+            api.addNewAddress({
               city: res.cityName,
               country: res.countryName,
               province: res.provinceName,
@@ -217,9 +220,11 @@ export default {
               detailInfo: res.detailInfo,
               phoneNumber: res.telNumber
             }).then(res => {
-              if ( !isEmpty(res.id) ) {
+              var address = res.data
+              if ( !isEmpty(address.id) ) {
                 this.wxChooseBtnLoading = false
-                vm.updateReceiver( res );
+                this.isShowAddressSection = true
+                this.updateReceiver( address )
                 this.$vux.toast.show({ text: '添加完成' })
               } else {
                 this.$vux.toast.show({
@@ -240,22 +245,26 @@ export default {
     /**
      * 档地址被创建的时候
      */
-    onNewAddressSubmit(address) {
-      api.addNewAddress(address).then( res => {
-        var address = res.data
-        if ( !isEmpty(address.id) ) {
-          this.updateReceiver(address)
-          // 保存成功关闭 dialog
-          this.showAddAddressDialog = false
-        } else {
-          this.$vux.toast.text('地址创建失败', 'middle')
-        }
-      })
+    onNewAddressSubmit(newAddress) {
+      // 增加新地址
+      if ( newAddress.type === 0 ) {
+        api.addNewAddress(newAddress.address).then( res => {
+          var address = res.data
+          if ( !isEmpty(address.id) ) {
+            this.updateReceiver(address)
+            // 显示顶部地址栏
+            this.isShowAddressSection = true
+            // 保存成功关闭 dialog
+            this.showAddAddressDialog = false
+          } else {
+            this.$vux.toast.text('地址创建失败', 'middle')
+          }
+        })
+      }
     },
     requestConsumeObtain() {
       api.requestConsumeObtain(this.channelId, this.receiver.id).then( res => {
         var {code, orderId, wxPayment} = res.data
-        console.log(res)
         switch (code) {
           // 不需要支付
           case 1:
@@ -293,6 +302,16 @@ export default {
               console.error(e)
             }
             break;
+        }
+      }, err => {
+        if ( err.code === 404 ) {
+          // 如果什么都没有抢到，就跳到抢书页面
+          this.$vux.alert.show({
+            content: err.message,
+            onHide : () => {
+              this.$router.push({ name: 'obtain_channel_item', params: { channelId: this.channelId } })
+            }
+          })
         }
       })
     }

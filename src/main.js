@@ -11,8 +11,8 @@ import './lib/type'
 console.log('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
 if (process.env.NODE_ENV === 'development') {
-  // var VConsole = require('vconsole')
-  // new VConsole()
+  var VConsole = require('vconsole')
+  new VConsole()
 }
 
 import 'font-awesome-webpack'

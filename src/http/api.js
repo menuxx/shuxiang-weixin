@@ -18,6 +18,16 @@ export const getVipChannelItem = channelId => {
 }
 
 /**
+ * 获取一个 channel 相关的所有订单
+ * 只包含订单数量 和订单用户
+ * count
+ * user 50
+ */
+export const getVChannelOrders = (channelId, pageNum=1, pageSize=10) => {
+  return http.get(`/v_channels/${channelId}/order_users?pageNum=${pageNum}&pageSize=${pageSize}`)
+}
+
+/**
  * 通过 code 换取 sessionToken
  * @param code
  */

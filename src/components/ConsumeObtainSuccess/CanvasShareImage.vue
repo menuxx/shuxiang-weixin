@@ -5,7 +5,6 @@
   </div>
 </template>
 <script>
-
 const html = `
 <div class="sx-container">
   <style type="text/css">
@@ -89,26 +88,27 @@ const html = `
     }
   </style>
   <div class="avatar-next-to-section">
-    <img class="channel-image avatar" src="/101.jpeg">
+    <img class="channel-image avatar" src="{{ ownerImageUrl }}">
     <img class="sx-exchange-icon" src="/raw_1512368508.png">
-    <img class="obtain-user avatar" src="/201.jpeg">
+    <img class="obtain-user avatar" src="{{ userAvatarUrl }}">
   </div>
 
-  <p class="slogan-text">尹昶胜 成功领取雷军送出的新书《见识》</p>
+  <p class="slogan-text">{{ userName }}成功领取{{ ownerName }}送出的新书《见识》</p>
 
   <div class="ranking-section">
-    <img class="ranking-icon" src="/ic_queue.png"> 第 <span class="ranking-num">1</span> 名
+    <img class="ranking-icon" src="/ic_queue.png"> 第 <span class="ranking-num">{{ queueNum }}</span> 名
   </div>
 
   <div class="item-image-wrap">
-    <img class="item-image" src="/raw_1512110740.jpeg">
+    <img class="item-image" src="{{ itemCoverImageUrl }}">
   </div>
 
   <div class="qrcode-wrap">
-    <img class="qrcode-image" src="/7f960e2023fb5944592f615e20e4eef81.png" />
+    <img class="qrcode-image" src="{{ shopUrlQrcodeUrl }}" />
     <p class="desc-info-sm">扫码领优惠券</p>
   </div>
 </div>`
+import {makeQrcodeUrl} from '../../lib/util'
 import * as rasterizeHTML from 'rasterizehtml'
 export default {
   data() {
@@ -116,14 +116,25 @@ export default {
       imgSrc: null
     }
   },
-  mounted() {
-    var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
-    rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
+  methods: {
+    onDraw(data) {
+      console.log(makeQrcodeUrl(data.shopUrl))
+      var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
+      console.log( makeQrcodeUrl(encodeURIComponent(data.shopUrl)))
+      _html = _html.replace('{{ shopUrlQrcodeUrl }}', makeQrcodeUrl(data.shopUrl))
+        .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl)
+        .replace('{{ ownerName }}', data.ownerName)
+        .replace('{{ queueNum }}', data.queueNum)
+        .replace('{{ userName }}', data.userName)
+        .replace('{{ userAvatarUrl }}', data.userAvatarUrl)
+        .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl)
+      rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
         console.log(result)
         this.imgSrc = result.image.src
-    }, err => {
-      console.log('An error occured:', err);
-    });
+      }, err => {
+        console.log('An error occured:', err);
+      });
+    }
   }
 }
 </script>
