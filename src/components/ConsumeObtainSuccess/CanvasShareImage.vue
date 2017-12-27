@@ -147,7 +147,7 @@ export default {
         .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
         .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
       rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
-          // this.imgSrc = result.image.src
+        try {
           this.$refs.canvas.toBlob( blob => {
             qiniuUpload({
               file: blob,
@@ -164,6 +164,9 @@ export default {
               }
             })
           }, 'image/png', 0.95)
+        } catch (e) {
+          console.log(e)
+        }
       }, err => {
         console.log('An error occured:', err);
       });
