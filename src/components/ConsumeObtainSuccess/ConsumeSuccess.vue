@@ -2,35 +2,34 @@
     <div class="sx-container">
       <div class="exchange-next-to-section">
         <img class="channel-image avatar" :src="myConsumeChannelOrderDetails.vChannel.ownerAvatarUrl">
-        <i class="fa fa-exchange sx-exchange-icon" aria-hidden="true"></i>
+        <img class="exchange-icon" src="../../assets/ic_giftbook.png" />
         <img class="obtain-user avatar" :src="myConsumeChannelOrderDetails.user.avatarUrl">
       </div>
-      <p class="slogan-text">{{ myConsumeChannelOrderDetails.user.userName }} 成功领取{{ myConsumeChannelOrderDetails.vChannel.ownerName }}送出的新书 {{ myConsumeChannelOrderDetails.vChannel.item.name }}</p>
+      <p class="slogan-text">{{ myConsumeChannelOrderDetails.user.userName }}成功领取{{ myConsumeChannelOrderDetails.vChannel.ownerName }}送出的新书{{ myConsumeChannelOrderDetails.vChannel.item.name }}</p>
       <div class="ranking-section">
         <img class="ranking-icon" src="../../assets/ic_queue.png"> 第 <span class="ranking-num">{{ myConsumeChannelOrderDetails.queueNum }}</span> 名
       </div>
       <div class="item-image-wrap">
         <img class="item-image" :src="myConsumeChannelOrderDetails.vChannel.item.coverImageUrl">
       </div>
-
-      <x-button @click.native="onShareVChannel" type="primary">分享给好友</x-button>
-
+      <box gap="10px 10px">
+        <x-button @click.native="onShareVChannel" type="primary">分享给好友</x-button>
+      </box>
       <div v-transfer-dom>
         <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent' }">
           <div class="share-image-wrap">
             <CanvasShareImage ref="shareImage" />
           </div>
-          <cell @click.native="showWithMeShareImage = false" primary="content" value-align="center">
-            <img width="20" style="color: #fff;" src="../../assets/close.png" />
+          <cell @click.native="showWithMeShareImage = false" value-align="center">
+            <img slot="title" width="20" style="color: #fff;" src="../../assets/close.png" />
           </cell>
         </x-dialog>
       </div>
-
     </div>
 </template>
 <style lang="scss" scoped>
 .sx-container {
-  padding: 1rem 0.5rem;
+  margin-top: 10px;
 }
 .exchange-next-to-section {
   display: flex;
@@ -44,8 +43,9 @@
     height: 3.8rem;
     width: 3.8rem;
   }
-  .sx-exchange-icon {
-    font-size: 1.5rem;
+  .exchange-icon {
+    display: block;
+    width: 40px;
   }
   .avatar.channel-image {
     margin-right: 0.5rem;
@@ -56,18 +56,21 @@
 }
 .slogan-text {
   font-size: 0.8rem;
-  margin-bottom: 1rem;
+  margin: 10px;
 }
 .ranking-section {
+  margin-bottom: 10px;
+  color: #F3A536;
+  font-size: 23px;
   .ranking-icon {
     vertical-align: middle;
     width: 2rem;
   }
   .ranking-num {
-    color: #e51c23;
   }
 }
 .item-image-wrap {
+  padding: 20px 0;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
@@ -78,11 +81,10 @@
     height: 300px;
   }
 }
-
-  // 分享图片
-  .share-image-wrap {
-    background-color: #fff;
-  }
+// 分享图片
+.share-image-wrap {
+  background-color: #fff;
+}
 </style>
 <script>
   import * as config from '../../config'
@@ -90,13 +92,13 @@
   import {cdnFullUrl} from '../../filters'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import {getOrderDetailsById} from '../../http/api'
-import { XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
+import { Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
 import CanvasShareImage from './CanvasShareImage'
 export default {
   directives: {
     TransferDom
   },
-  components: { XButton, XDialog, CanvasShareImage, Cell },
+  components: { Box, XButton, XDialog, CanvasShareImage, Cell },
   beforeRouteEnter(to, from, next) {
     var {orderId} = to.params
     getOrderDetailsById(orderId).then( res => {
@@ -126,7 +128,7 @@ export default {
           ownerName: details.vChannel.ownerName,
           userName: details.user.userName,
           userAvatarUrl: details.user.avatarUrl,
-          ownerAvatarUrl: cdnFullUrl(details.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
+          ownerAvatarUrl: cdnFullUrl(details.vChannel.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
         })
         this.showWithMeShareImage = true
       }

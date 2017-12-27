@@ -6,6 +6,11 @@ import * as types from './types'
 // 此处更新 state
 
 export default {
+  [types.TITLE_UPDATE] (state, title) {
+    window.title = title
+    document.title = title
+    state.app.windowTitle = title
+  },
   // 更新 app loading
   [types.UPDATE_LOADING_STATE] (state, payload) {
     state.app.showLoading = payload.isLoading
@@ -14,22 +19,24 @@ export default {
     state.auth.token = payload.token
     state.auth.userInfo = payload.userInfo
   },
-	[types.CHANNEL_ITEM_LOADED] (state, { channel, partner }) {
+  // 参与者更新
+  [types.CHANNEL_PARTNER_LOADED] (state, partner) {
+    // 参与者人数
+    state.channelItem.partners = partner.users
+    state.channelItem.partnerCount = partner.count
+  },
+	[types.CHANNEL_ITEM_LOADED] (state, channel) {
     // 计数器数量
     state.channelItem.ownerName = channel.ownerName
     state.channelItem.ownerAvatar = channel.ownerAvatar
     state.channelItem.giftTxt = channel.giftTxt
     state.channelItem.channelId = channel.id
-    // 参与者人数
-    state.channelItem.partners = partner.users
-    state.channelItem.partnerCount = partner.count
     // 得到还剩下多少本书
     // state.channelItem.remainNum = 库存数 - 订单数
     state.channelItem.item = channel.item
     // 处理图片 url
     state.channelItem.item.coverImageUrl = cdnFullUrl(channel.item.coverImage, QiNiuImagePrefix.item)
     state.channelItem.stock = channel.stock
-    state.channelItem.remainNum = channel.stock - partner.count
 	},
   /**
    * 更新我的收货人地址信息

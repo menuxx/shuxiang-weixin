@@ -10,63 +10,74 @@
         </x-dialog>
       </div>
 
+      <scroller lock-x :scrollbar-x=false :scrollbar-y=true>
         <div class="sx-address-list">
-
             <div class="sx-address-item" v-for="(address, index) in addresses" :key="address.id">
-                <div class="sx-address-item_view">
-                    <div class="p1">
-                        <div class="line1">
-                            <span class="receiver-name">{{ address.receiverName }}</span>
-                            <span class="phone-number">{{ address.phoneNumber | phoneNumberBeautiful }}</span>
-                        </div>
-                        <div class="line2">
-                            {{ address.province }}{{ address.city }}{{address.country}}{{address.detailInfo}}
-                        </div>
-                    </div>
-                    <div class="p2">
-                        <a class="sx-btn-apply" @click="onApplyAddress(index)">使用</a>
-                    </div>
+              <div class="sx-address-item_view">
+                <div class="p1">
+                  <div class="line1">
+                    <span class="receiver-name">{{ address.receiverName }}</span>
+                    <span class="phone-number">{{ address.phoneNumber | phoneNumberBeautiful }}</span>
+                  </div>
+                  <div class="line2">
+                    {{ address.province }}{{ address.city }}{{address.country}}{{address.detailInfo}}
+                  </div>
                 </div>
-                <div class="sx-bottom-bar">
-                    <check-icon @click.native="onAddressPrimary(index)" :value="address.primary == 1">设置默认</check-icon>
-                    <div class="bar-btn-group">
-                        <a class="btn-item-edit" @click="onShowEditAddressDialog(index)">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                            编辑
-                        </a>
-                        <a class="btn-item-remove" @click="onDelAddress(index)">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                            删除
-                        </a>
-                    </div>
+                <div class="p2">
+                  <x-button @click.native="onApplyAddress(index)" mini plain type="primary">使用</x-button>
                 </div>
+              </div>
+              <div class="__bottom-bar">
+                <check-icon type="plain" @click.native="onAddressPrimary(index)" :value="address.primary == 1">
+                  {{  address.primary == 1 ? '' : '设置默认'  }}
+                </check-icon>
+                <div class="bar-btn-group">
+                  <a class="btn-item-edit" @click="onShowEditAddressDialog(index)">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                    编辑
+                  </a>
+                  <a class="btn-item-remove" @click="onDelAddress(index)">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    删除
+                  </a>
+                </div>
+              </div>
             </div>
-
         </div>
+      </scroller>
 
-        <flexbox>
-            <flexbox-item>
-                <x-button type="warn" @click.native="onShowAddNewAddressDialog">
-                    <i class="fa fa-plus" aria-hidden="true"></i> 手动添加
-                </x-button>
-            </flexbox-item>
-            <flexbox-item>
-                <x-button type="primary" @click.native="onAddNewAddressFromWeiXin">
-                    <i class="fa fa-weixin" aria-hidden="true"></i> 微信导入
-                </x-button>
-            </flexbox-item>
+      <box gap="10px 10px" class="sx-bottom-bar">
+        <flexbox justify="space-between" wrap="nowrap">
+          <flexbox-item>
+            <x-button :gradients="['#FF5E3A', '#FF9500']" @click.native="onShowAddNewAddressDialog">
+              <i class="fa fa-plus" aria-hidden="true"></i> 手动添加
+            </x-button>
+          </flexbox-item>
+          <flexbox-item>
+            <x-button type="primary" @click.native="onAddNewAddressFromWeiXin">
+              <i class="fa fa-weixin" aria-hidden="true"></i> 微信导入
+            </x-button>
+          </flexbox-item>
         </flexbox>
+      </box>
 
     </div>
 </template>
 <style lang="scss" scoped>
   @import './EditAddress';
+  .sx-container {
+    display: flex;
+    height: 100%;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+  }
   .sx-address-list {
-
+    flex: 1;
   }
 </style>
 <script>
-	import { Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, TransferDomDirective as TransferDom } from 'vux'
+  import Vue from 'vue'
+	import { Box, Scroller ,Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, TransferDomDirective as TransferDom } from 'vux'
   import NewAddressPanel from '@/components/EditAddress/NewAddressPanel'
   import { mapState, mapMutations, mapActions } from 'vuex'
   import * as api from '../../http/api'
@@ -74,10 +85,13 @@
   import isEmpty from 'is-empty'
   import {addressRedirectTo} from '../../weixin'
   import qs from 'querystring'
+  import InlineLoading from "../../../node_modules/vux/src/components/inline-loading/index.vue";
 
 	export default {
     directives: { TransferDom },
-		components: { Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, NewAddressPanel },
+		components: {
+      InlineLoading,
+      Box, Scroller ,Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, NewAddressPanel },
 		data() {
 			return {
 			  editAddressDialogTitle: '',

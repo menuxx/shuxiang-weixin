@@ -18,6 +18,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 const state = {
   app: {
+    windowTitle: '',
     showLoading: false,
   },
   auth: {
@@ -36,8 +37,6 @@ const state = {
     ownerName: null,
     // 库存个数（全部）
     stock: 0,
-    // 剩下的个书
-    remainNum: 0,
     // 参与者人数
     partnerCount: 0,
     // 参与者列表, id 为 键

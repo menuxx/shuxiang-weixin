@@ -17,14 +17,20 @@ function formatDateTime(date) {
   return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
 }
 
+function formatTime(date) {
+  var hour = date.getHours()
+  var minute = date.getMinutes()
+  var second = date.getSeconds()
+  return [hour, minute, second].map(formatNumber).join(':')
+}
+
 function formatNumber(n) {
   n = n.toString()
   return n[1] ? n : '0' + n
 }
 
 export const timestampFormat = function (timestamp) {
-  console.log(timestamp)
-  return formatDateTime(new Date(timestamp))
+  return formatTime(new Date(timestamp))
 }
 
 export const phoneNumberBeautiful = function (phoneNumber) {

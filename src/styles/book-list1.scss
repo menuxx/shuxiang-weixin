@@ -1,12 +1,17 @@
 
 .book-item {
-  padding: 0.3rem 0.5rem;
+  padding: 0.62rem 0.62rem 0.62rem 0.62rem;
   font-size: 0.8rem;
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-between;
-  border-bottom: 1px solid #ccc;
+  justify-content: flex-start;
+  border-bottom: 1px solid #d6d6d6;
   .col1 {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    margin-right: 0.62rem;
     .item-thumb {
       width: 100px;
       height: 100px;
@@ -28,7 +33,7 @@
       font-size: 0.7rem;
     }
     .price {
-      font-size: 0.7rem;  
+      font-size: 0.7rem;
     }
   }
   .col3 {
@@ -46,8 +51,4 @@
       align-self: flex-start;
     }
   }
-}
-
-.book-item:last-child {
-  border-bottom: none;
 }

@@ -16,7 +16,7 @@
           <div class="p1">
             <div class="line1">
               <span class="receiver-name">{{ receiver.receiverName }}</span>
-              <span class="phone-number">{{ receiver.phoneNumber }}</span>
+              <span class="phone-number">{{ receiver.phoneNumber | phoneNumberBeautiful }}</span>
             </div>
             <div class="line2">
               {{ receiver.province }}{{ receiver.city }}{{ receiver.county }}{{ receiver.detailInfo }}
@@ -24,7 +24,8 @@
           </div>
           <div class="p2">
             <a class="sx-btn-apply" @click="onChooseMoreAddress">
-              <i class="fa fa-arrow-right" aria-hidden="true"></i>
+              <i v-if="!isShowChooseMoreAddressLoading" class="fa fa-arrow-right" aria-hidden="true"></i>
+              <inline-loading v-if="isShowChooseMoreAddressLoading"></inline-loading>
             </a>
           </div>
         </div>
@@ -40,43 +41,76 @@
       </cell>
     </group>
 
-    <div class="book-list-1" v-for="i in [1]" :key="i">
+    <div class="book-list">
       <div class="book-item">
         <div class="col1">
           <img class="item-thumb" :src="item.coverImageUrl">
         </div>
         <div class="col2">
           <h4 class="item-name">{{ item.name }}</h4>
-          <p class="item-desc-text">{{ item.describe }}</p>
-        </div>
-        <div class="col3">
-          <a class="attach-line">限 1 本</a>
+          <p class="item-desc-text">{{ ownerName }}赠送-限1本</p>
         </div>
       </div>
     </div>
 
-    <divider class="sx-spl">立即领取</divider>
-    <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false">「{{ ownerName }}」送出 {{ stock }} 本新书，马上抢读</x-button>
+    <div class="sx-fixed-bottom">
+      <divider class="sx-spl">限时5分钟，立即下手</divider>
+      <div class="sx-bottom-bar">
+        <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false" :disabled="false">{{ ownerName }}送出 {{ stock }} 本新书，马上抢读</x-button>
+      </div>
+    </div>
 
   </div>
 
 </template>
 <style lang="scss" scoped>
-@import '../EditAddress/EditAddress';
 @import "../../styles/book-list1";
+
 .sx-address-item {
-  padding: 0;
-  .p2 {
-    .sx-btn-apply {
-      display: block;
-      height: 2rem;
-      width: 2rem;
-      line-height: 2rem;
-      text-align: center;
-      color: #38f;
+  border-bottom: 1px solid #d6d6d6;
+  padding: 10px 0;
+  .sx-address-item_view {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.8rem;
+    align-items: center;
+    padding: 0 10px;
+    .p1 {
+      flex: 1;
+      text-align: left;
+      .line1 {
+        .receiver-name {
+          font-weight: bold;
+        }
+        .phone-number {
+
+        }
+      }
+      .line2 {
+        font-size: 0.7rem;
+      }
+    }
+    .p2 {
+      align-self: center;
+      .sx-btn-apply {
+        display: block;
+        line-height: 2rem;
+        text-align: center;
+        color: #38f;
+        width: 2rem;
+        height: 2rem;
+      }
     }
   }
+  .__bottom-bar {
+    margin: 0 10px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    font-size: 0.75rem;
+  }
 }
+
 .sx-address-section:after {
   content: ' ';
   display: block;
@@ -108,14 +142,23 @@
 .sx-container {
 
 }
+.sx-fixed-bottom {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+}
 // 分割线
 .sx-spl {
   font-size: 0.7rem;
 }
+  .sx-bottom-bar {
+    margin: 0 10px;
+  }
 </style>
 <script>
 // 持有项目
-import { XButton, CellBox,  Grid, GridItem, Divider, Cell, Group, XDialog, TransferDomDirective as TransferDom } from 'vux'
+import { InlineLoading, XButton, CellBox,  Grid, GridItem, Divider, Cell, Group, XDialog, TransferDomDirective as TransferDom } from 'vux'
 import NewAddressPanel from '@/components/EditAddress/NewAddressPanel'
 import { mapState, mapMutations } from 'vuex'
 import * as types from '../../sotre/types'
@@ -140,9 +183,10 @@ function getAddress(addressId) {
 
 export default {
   directives: { TransferDom },
-  components : { XButton, Divider, Grid, GridItem, Cell, CellBox, Group, XDialog, NewAddressPanel },
+  components : { XButton, Divider, Grid, GridItem, Cell, CellBox, Group, XDialog, NewAddressPanel, InlineLoading },
   data() {
     return {
+      isShowChooseMoreAddressLoading: false,
       isShowAddressSection: false,
       addressLabels: {
         sys: '手动添加收货地址',
@@ -173,7 +217,7 @@ export default {
       var receiverAddressRes = res[1]
       // 如果能够获取到地址， 就直接填充改地址
         next(vm => {
-          vm.channelItemLoaded( channelItem );
+          vm.channelItemLoaded( channelItem )
           if ( !isEmpty(receiverAddressRes.data) ) {
             var receiverAddress = receiverAddressRes.data
             vm.isShowAddressSection = true
@@ -189,6 +233,7 @@ export default {
     }),
     onChooseMoreAddress() {
       addressToPath(this.$router.currentRoute.fullPath)
+      this.isShowChooseMoreAddressLoading = true
       this.$router.push({ name: 'user_address' })
     },
     onChooseSysAddress() {

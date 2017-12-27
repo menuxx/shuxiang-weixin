@@ -1,10 +1,11 @@
 <template>
   <div>
     <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
-    <img class="image" :src="imgSrc" />
+    <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
   </div>
 </template>
 <script>
+  import qiniuUpload from '../../lib/qiniu-upload'
 const html = `
 <div class="sx-container">
   <style type="text/css">
@@ -50,6 +51,7 @@ const html = `
       justify-content: center;
       color: #F3A536;
       font-size: 45px;
+      margin-bottom: 10px;
     }
     .ranking-section .ranking-icon {
       display: block;
@@ -57,6 +59,7 @@ const html = `
       width: 100px;
     }
     .item-image-wrap {
+      padding: 10px 0;
       display: flex;
       justify-content: center;
     }
@@ -88,15 +91,15 @@ const html = `
     }
   </style>
   <div class="avatar-next-to-section">
-    <img class="channel-image avatar" src="{{ ownerImageUrl }}">
-    <img class="sx-exchange-icon" src="/raw_1512368508.png">
+    <img class="channel-image avatar" src="{{ ownerAvatarUrl }}">
+    <img class="sx-exchange-icon" src="/ic_giftbook.png">
     <img class="obtain-user avatar" src="{{ userAvatarUrl }}">
   </div>
 
   <p class="slogan-text">{{ userName }}成功领取{{ ownerName }}送出的新书《见识》</p>
 
   <div class="ranking-section">
-    <img class="ranking-icon" src="/ic_queue.png"> 第 <span class="ranking-num">{{ queueNum }}</span> 名
+    <img class="ranking-icon" src="/ic_queue.png">第<span class="ranking-num">{{ queueNum }}</span>名
   </div>
 
   <div class="item-image-wrap">
@@ -108,8 +111,19 @@ const html = `
     <p class="desc-info-sm">扫码领优惠券</p>
   </div>
 </div>`
-import {makeQrcodeUrl} from '../../lib/util'
+  import config from '../../config'
+  import {dataURItoBlob} from '../../lib/image'
+import {makeSameOriginUrl} from '../../lib/util'
 import * as rasterizeHTML from 'rasterizehtml'
+import QRious from 'qrious'
+import dataURLtoBlob from 'blueimp-canvas-to-blob';
+
+function makeQrcodeDataUrl(url) {
+  var qr = new QRious({
+    value: url
+  });
+  return qr.toDataURL();
+}
 export default {
   data() {
     return {
@@ -117,20 +131,39 @@ export default {
     }
   },
   methods: {
+    onImageClick() {
+      this.$wechat.previewImage({
+        current: this.imgSrc,
+        urls: [this.imgSrc]
+      })
+    },
     onDraw(data) {
-      console.log(makeQrcodeUrl(data.shopUrl))
       var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
-      console.log( makeQrcodeUrl(encodeURIComponent(data.shopUrl)))
-      _html = _html.replace('{{ shopUrlQrcodeUrl }}', makeQrcodeUrl(data.shopUrl))
-        .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl)
+      _html = _html.replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
+        .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl))
         .replace('{{ ownerName }}', data.ownerName)
         .replace('{{ queueNum }}', data.queueNum)
         .replace('{{ userName }}', data.userName)
-        .replace('{{ userAvatarUrl }}', data.userAvatarUrl)
-        .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl)
+        .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
+        .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
       rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
-        console.log(result)
-        this.imgSrc = result.image.src
+          // this.imgSrc = result.image.src
+          this.$refs.canvas.toBlob( blob => {
+            qiniuUpload({
+              file: blob,
+              data: {
+                keyPrefix: config.QiNiuImagePrefix.share
+              },
+              onProgress: () => {},
+              onSuccess: (res) => {
+                console.log(res)
+                this.imgSrc = config.QiNiuBaseUrl + res.key
+              },
+              onError: (err) => {
+                console.log(err)
+              }
+            })
+          }, 'image/png', 0.95)
       }, err => {
         console.log('An error occured:', err);
       });

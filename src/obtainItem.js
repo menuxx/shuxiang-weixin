@@ -15,6 +15,8 @@ export const getLoopRefId = (channelId) => {
   if ( Date.now() - data.meta.createAt > 600 * 1000  ) {
     setLoopRefId(channelId, data.data)
     return data.data
+  } else {
+    freeLoopRefId(channelId)
   }
   return null
 }

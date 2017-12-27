@@ -23,6 +23,10 @@ export const MY_PRIMARY_ADDRESS_LOADED = 'my_primary_address_loaded'
 
 export const CHANNEL_ITEM_LOADED = 'channel_item_loaded'
 
+export const CHANNEL_PARTNER_LOADED = 'channel_partner_loaded'
+
+export const TITLE_UPDATE = 'window_title_update'
+
 export const TITLE = 'title'
 
 export const LOGOUT = 'logout'

@@ -16,7 +16,10 @@
 
     <x-textarea :required="true" :max="30" v-model="detailInfo" placeholder="详细位置"></x-textarea>
 
-    <x-button @click.native="onSubmit" type="primary" :disabled="saveBtnDisable">确认</x-button>
+    <box gap="10px 10px">
+      <x-button @click.native="onSubmit" type="primary" :disabled="saveBtnDisable">确认</x-button>
+    </box>
+
   </group>
 </template>
 <style lang="scss">
@@ -24,9 +27,9 @@
 </style>
 <script>
   import isEmpty from 'is-empty'
-import { Flexbox, FlexboxItem, Group, Grid, GridItem, Cell, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data, Value2nameFilter as value2name } from 'vux'
+import { Box, Flexbox, FlexboxItem, Group, Grid, GridItem, Cell, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data, Value2nameFilter as value2name } from 'vux'
 export default {
-  components: { Flexbox, FlexboxItem, Group, Grid, GridItem, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data },
+  components: { Box, Flexbox, FlexboxItem, Group, Grid, GridItem, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data },
   data() {
 
     return {
