@@ -144,12 +144,12 @@ export default {
     onDraw(data) {
       var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
       _html = _html.replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
-        .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl))
+        .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl)
         .replace('{{ ownerName }}', data.ownerName)
         .replace('{{ queueNum }}', data.queueNum)
         .replace('{{ userName }}', data.userName)
-        .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
-        .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
+        .replace('{{ userAvatarUrl }}', data.userAvatarUrl )
+        .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl )
       rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
         try {
           this.$refs.canvas.toBlob( blob => {
