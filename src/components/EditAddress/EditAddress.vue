@@ -1,5 +1,5 @@
 <template>
-    <div class="sx-container">
+    <div class="page-container">
 
       <div v-transfer-dom>
         <x-dialog v-model="showEditAddressDialog" style="padding: 10px;">
@@ -10,7 +10,7 @@
         </x-dialog>
       </div>
 
-      <scroller lock-x :scrollbar-x=false :scrollbar-y=true>
+      <scroller height="-62" lock-x :scrollbar-x="false" :scrollbar-y="true" class="sx-address-list-scroll">
         <div class="sx-address-list">
             <div class="sx-address-item" v-for="(address, index) in addresses" :key="address.id">
               <div class="sx-address-item_view">
@@ -24,7 +24,7 @@
                   </div>
                 </div>
                 <div class="p2">
-                  <x-button @click.native="onApplyAddress(index)" mini plain type="primary">使用</x-button>
+                  <x-button v-if="showApplyBtn" @click.native="onApplyAddress(index)" mini plain type="primary">使用</x-button>
                 </div>
               </div>
               <div class="__bottom-bar">
@@ -65,14 +65,12 @@
 </template>
 <style lang="scss" scoped>
   @import './EditAddress';
-  .sx-container {
-    display: flex;
+  .page-container {
     height: 100%;
-    flex-flow: column nowrap;
-    justify-content: space-between;
   }
-  .sx-address-list {
-    flex: 1;
+  .sx-address-list-scroll {
+  }
+  .sx-bottom-bar {
   }
 </style>
 <script>
@@ -83,7 +81,7 @@
   import * as api from '../../http/api'
   import * as types from '../../sotre/types'
   import isEmpty from 'is-empty'
-  import {addressRedirectTo} from '../../weixin'
+  import {addressRedirectTo, lookupAddressToPath} from '../../weixin'
   import qs from 'querystring'
   import InlineLoading from "../../../node_modules/vux/src/components/inline-loading/index.vue";
 
@@ -94,6 +92,7 @@
       Box, Scroller ,Cell, CheckIcon, Flexbox, FlexboxItem, XButton, XDialog, NewAddressPanel },
 		data() {
 			return {
+			  showApplyBtn: false,
 			  editAddressDialogTitle: '',
         showEditAddressDialog: false
       }
@@ -101,6 +100,7 @@
     beforeRouteEnter (to, from, next) {
       api.getMyAddresses().then( res => {
         next(vm => {
+          vm.showApplyBtn = !isEmpty(lookupAddressToPath())
           vm.myAddressLoaded(res.data)
         })
       })

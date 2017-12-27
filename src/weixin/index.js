@@ -8,6 +8,15 @@ export const addressToPath = (path) => {
   sessionStorage.setItem(SELECTED_ADDRESS_ID, JSON.stringify({ redirectPath: path }))
 }
 
+export const lookupAddressToPath = () => {
+  var addStr = sessionStorage.getItem(SELECTED_ADDRESS_ID)
+  try {
+    return JSON.parse(addStr)
+  } catch (e) {
+    return null
+  }
+}
+
 export const addressRedirectTo = (args) => {
   var addStr = sessionStorage.getItem(SELECTED_ADDRESS_ID)
   try {
