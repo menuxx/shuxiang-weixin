@@ -1,7 +1,9 @@
 <template>
-  <div>
+  <div class="sx-container">
     <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
-    <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
+    <div class="img-wrap">
+      <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
+    </div>
   </div>
 </template>
 <script>
@@ -111,12 +113,13 @@ const html = `
     <p class="desc-info-sm">扫码领优惠券</p>
   </div>
 </div>`
-  import config from '../../config'
-  import {dataURItoBlob} from '../../lib/image'
+import config from '../../config'
+import {dataURItoBlob} from '../../lib/image'
 import {makeSameOriginUrl} from '../../lib/util'
 import * as rasterizeHTML from 'rasterizehtml'
 import QRious from 'qrious'
-import dataURLtoBlob from 'blueimp-canvas-to-blob';
+import dataURLtoBlob from 'blueimp-canvas-to-blob'
+  import InlineLoading from "../../../node_modules/vux/src/components/inline-loading/index.vue";
 
 function makeQrcodeDataUrl(url) {
   var qr = new QRious({
@@ -125,6 +128,7 @@ function makeQrcodeDataUrl(url) {
   return qr.toDataURL();
 }
 export default {
+  components: {InlineLoading},
   data() {
     return {
       imgSrc: null
@@ -156,7 +160,6 @@ export default {
               },
               onProgress: () => {},
               onSuccess: (res) => {
-                console.log(res)
                 this.imgSrc = config.QiNiuBaseUrl + res.key
               },
               onError: (err) => {
@@ -175,9 +178,19 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-  .image {
-    width: 100%;
-    height: 100%;
+  .sx-container {
+    display: flex;
+    justify-content: center;
+  }
+  .img-wrap {
+    height: 400px;
+    width: 224px;
+    display: flex;
+    justify-content: center;
+    .image {
+      border: 0;
+      width: 100%;
+    }
   }
   .canvas-hide {
     display: none;

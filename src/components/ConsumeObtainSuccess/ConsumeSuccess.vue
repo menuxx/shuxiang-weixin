@@ -16,7 +16,7 @@
         <x-button @click.native="onShareVChannel" type="primary">分享给好友</x-button>
       </box>
       <div v-transfer-dom>
-        <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent' }">
+        <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent', width: '224px' }">
           <div class="share-image-wrap">
             <CanvasShareImage ref="shareImage" />
           </div>
@@ -119,7 +119,7 @@ export default {
       ...mapMutations({
         consumeChannelOrderLoaded: types.MY_CONSUME_ORDER_LOADED
       }),
-      onShareVChannel() {
+      drawShareImage() {
         var details = this.myConsumeChannelOrderDetails
         this.$refs.shareImage.onDraw({
           queueNum: details.queueNum,
@@ -130,6 +130,9 @@ export default {
           userAvatarUrl: details.user.avatarUrl,
           ownerAvatarUrl: cdnFullUrl(details.vChannel.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
         })
+      },
+      onShareVChannel() {
+        this.drawShareImage()
         this.showWithMeShareImage = true
       }
   }
