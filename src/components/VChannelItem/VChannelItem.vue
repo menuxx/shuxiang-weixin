@@ -169,6 +169,7 @@
        * 渠道商品抢购
        */
       channelItemObtain : (channelId) => {
+        var self = this
         return http.get(api.ObtainChannelItem.replace('{channelId}', channelId)).then( res => {
           var {errCode, loopRefId, messageId, errMsg} = res.data
           // 满足轮询状态开始轮训
@@ -178,7 +179,7 @@
               // 如果已经过期，就重新发起请求
               if ( stateCode === States.FreeObtain ) {
                 next(false) // 中断上一次循环, 开始新的循环
-                return this.channelItemObtain()
+                return self.channelItemObtain(channelId)
               }
               // 成功抢到
               if (stateCode === States.Obtain || stateCode === States.Fail || stateCode === States.Finish || stateCode === States.ObtainConsumeAgain || stateCode === States.ObtainConsumed ) {
