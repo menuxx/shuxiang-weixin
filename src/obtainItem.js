@@ -4,6 +4,17 @@ import * as api from './http/api'
 import isEmpty from 'is-empty'
 import debounce from 'debounce-promise'
 
+export const States = {
+  Fail: -1,
+  NoObtain: 0,        // 未持有
+  Obtain: 1,          // 已持有 单位消费
+  ObtainConsumed: 2,  // 已消费 完成抢购
+  ObtainConsumeAgain: 3,  // 再次消费
+  Finish: 4,          // 抢完了，结束了
+  FreeObtain: 5,       // 持有释放了
+  ConsumeFail: 6       // 消费失败
+}
+
 const OBTAIN_ITEM_LOOP_REF_ID = '__obtainitem__looprefid__'
 
 export const getLoopRefId = (channelId) => {

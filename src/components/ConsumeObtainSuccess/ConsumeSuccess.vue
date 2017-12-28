@@ -87,11 +87,14 @@
 }
 </style>
 <script>
-  import * as config from '../../config'
-  import * as types from '../../sotre/types'
-  import {cdnFullUrl} from '../../filters'
+import * as config from '../../config'
+import * as types from '../../sotre/types'
+import * as auth from '../../http/auth'
+import isEmpty from 'is-empty'
+import {cdnFullUrl} from '../../filters'
+import router from '../../router'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import {getOrderDetailsById} from '../../http/api'
+import * as api from '../../http/api'
 import { Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
 import CanvasShareImage from './CanvasShareImage'
 export default {
@@ -101,10 +104,16 @@ export default {
   components: { Box, XButton, XDialog, CanvasShareImage, Cell },
   beforeRouteEnter(to, from, next) {
     var {orderId} = to.params
-    getOrderDetailsById(orderId).then( res => {
-      next( vm  => {
-        vm.consumeChannelOrderLoaded( res.data )
-      })
+    api.getOrderDetailsById(orderId).then( res => {
+      var order = res.data
+      // 如果订单用户与当前用户不一致，就跳转到首页
+      if ( order.userId !== auth.getUserInfo().id ) {
+        router.replace({ name: 'channel_item', params: { channelId: order.channelId } })
+      } else {
+        next( vm  => {
+          vm.consumeChannelOrderLoaded( res.data )
+        })
+      }
     })
   },
   computed: {

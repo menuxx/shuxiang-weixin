@@ -163,7 +163,9 @@ import NewAddressPanel from '@/components/EditAddress/NewAddressPanel'
 import { mapState, mapMutations } from 'vuex'
 import * as types from '../../sotre/types'
 import * as api from '../../http/api'
+import {States} from '../../obtainItem'
 import isEmpty from 'is-empty'
+import router from '../../router'
 import {addressToPath, addressReturnFrom} from '../../weixin'
 import {getLoopRefId, setLoopRefId, debounceLoopChannelState} from '../../obtainItem'
 
@@ -208,22 +210,32 @@ export default {
    */
   beforeRouteEnter (to, from, next) {
     var {channelId} = to.params
-    var {addressId} = addressReturnFrom()
-    Promise.all([
-      api.getVipChannelItem(channelId),
-      getAddress(addressId)
-    ]).then(res => {
+    // 检测用户当前的状态是否满足需求
+    api.getVChannelStoreUserState(channelId, getLoopRefId(channelId)).then( res => {
+      // 如果消费状态不知已持有，就返回上一级页面
+      if ( res.data.stateCode !== States.Obtain ) {
+        router.replace({ name: 'channel_item', params: { channelId } })
+        return Promise.reject(new Error(`stateCode = ${res.data.stateCode}, 不满足 stateCode === ${States.Obtain}`))
+      }
+      return Promise.resolve(res.data.stateCode)
+    }).then( stateCode => {
+      var {addressId} = addressReturnFrom()
+      Promise.all([
+        api.getVipChannelItem(channelId),
+        getAddress(addressId)
+      ])
+    }).then(res => {
       var channelItem = res[0].data
       var receiverAddressRes = res[1]
       // 如果能够获取到地址， 就直接填充改地址
-        next(vm => {
-          vm.channelItemLoaded( channelItem )
-          if ( !isEmpty(receiverAddressRes.data) ) {
-            var receiverAddress = receiverAddressRes.data
-            vm.isShowAddressSection = true
-            vm.updateReceiver( receiverAddress );
-          }
-        })
+      next(vm => {
+        vm.channelItemLoaded( channelItem )
+        if ( !isEmpty(receiverAddressRes.data) ) {
+          var receiverAddress = receiverAddressRes.data
+          vm.isShowAddressSection = true
+          vm.updateReceiver( receiverAddress )
+        }
+      })
     })
   },
   methods: {

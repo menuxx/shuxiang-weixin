@@ -66,7 +66,7 @@
   import {QiNiuImagePrefix} from '../../config'
   import {mapState, mapMutations} from 'vuex'
   import isEmpty from 'is-empty'
-
+  import {States} from '../../obtainItem'
   import PartnerListView from './PartnerList'
   import { Box, XButton, Popup, TransferDomDirective as TransferDom } from 'vux'
 
@@ -77,17 +77,6 @@
   import * as api from '../../http/api'
   import {cdnFullUrl} from '../../filters'
 
-  const States = {
-    Fail: -1,
-    NoObtain: 0,        // 未持有
-    Obtain: 1,          // 已持有 单位消费
-    ObtainConsumed: 2,  // 已消费 完成抢购
-    ObtainConsumeAgain: 3,  // 再次消费
-    Finish: 4,          // 抢完了，结束了
-    FreeObtain: 5,       // 持有释放了
-    ConsumeFail: 6       // 消费失败
-  }
-
   function getTitleTxt(channelItem) {
     return channelItem.ownerName + '送出' + channelItem.stock + '本新书，马上抢读'
   }
@@ -97,7 +86,7 @@
     components: { Box, XButton, PartnerListView, Popup },
     data() {
       return {
-        primaryBtnDisable: false,
+        primaryBtnDisable: true,
         primaryBtnTxt: '',
         showPartnerListView: false
       }
@@ -105,11 +94,11 @@
     // 数据加载
     beforeRouteEnter (to, from, next) {
       var {channelId} = to.params
-      channelId = parseInt(channelId, 10)
       if (Number.isInteger(channelId)) {
         Promise.all([
           api.getVipChannelItem(channelId),
-          api.getVChannelOrders(channelId)
+          api.getVChannelOrders(channelId),
+          api.getMyChannelOrder(channelId)
         ])
         .then( res => {
           next(vm => {
@@ -118,17 +107,22 @@
             // mutation 更新 store 中的 channelItem
             vm.channelPartnerLoaded( res[1].data )
             vm.channelItemLoaded( res[0].data )
-            vm.primaryBtnTxt = title
             // 合并数据
             // 如果存在 长轮训 id 就继续之前的操作
             var loopRefId = getLoopRefId(channelId)
             if ( !isEmpty(loopRefId) ) {
                 vm.continueLoopChannelState( loopRefId, channelId )
             }
+            // 没有订单 id 就说明，该用户没有参与过，可以抢
+            if ( isEmpty(res[2].data.id) ) {
+              vm.primaryBtnDisable = true
+              vm.primaryBtnTxt = title
+            } else {
+              vm.primaryBtnDisable = false
+              vm.primaryBtnTxt = title + '(已抢到)'
+            }
           })
         })
-      } else {
-        next(new Error('url参数错误'))
       }
     },
     computed: mapState({
