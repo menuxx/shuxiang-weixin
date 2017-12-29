@@ -165,12 +165,12 @@ const html = `
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
             .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
-            .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
+            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
             .replace('{{ ownerName }}', data.ownerName )
             .replace('{{ queueNum }}', data.queueNum )
             .replace('{{ userName }}', data.userName )
-            .replace('{{ userAvatarUrl }}', data.userAvatarUrl )
-            .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl )
+            .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
+            .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
           this.$refs.renderBox.innerHTML = _html
           try {
             html2canvas(document.querySelector("#__xsDOMImageContainer")).then( canvas => {
@@ -193,12 +193,12 @@ const html = `
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
             .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
-            .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
+            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
             .replace('{{ ownerName }}', data.ownerName )
             .replace('{{ queueNum }}', data.queueNum )
             .replace('{{ userName }}', data.userName )
-            .replace('{{ userAvatarUrl }}', data.userAvatarUrl )
-            .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl )
+            .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
+            .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
           rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
             this.$refs.canvas.toBlob( blob => { this.updateToQiniu(blob) }, "image/png")
           }, err => {

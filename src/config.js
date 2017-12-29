@@ -16,7 +16,7 @@ if (isProd()) {
     Domain: {
       AuthEntryPointUrl: "http://wxtest.qurenjia.com/wxauthcodetestredirect_2017",
       APIBaseUrl: "http://wxdev.qurenjia.com/api",
-      SiteBaseUrl: 'http://wxdev.qurenjia.com'
+      SiteBaseUrl: 'http://wxtest.qurenjia.com'
     }
   }
 }
