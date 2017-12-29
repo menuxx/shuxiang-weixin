@@ -103,7 +103,7 @@
               ownerName: channel.ownerName,
               giftTxt: channel.giftTxt,
               stock: channel.stock,
-              channelItemQrcodeUrl: makeQrcodeDataUrl(config.Domain.SiteBaseUrl + `?#/channels/${channelId}/item`)
+              channelItemUrl: config.Domain.SiteBaseUrl + `?#/channels/${channelId}/item`
             })
           })
       })
