@@ -9,6 +9,7 @@ import * as weixin from '../weixin'
 import {getSessionTokenByCode, refreshSessionToken} from '../http/api'
 import config from '../config'
 import {isProd} from '../env'
+import {RouteError} from '../lib/MyError'
 
 // import HomePage from '@/components/HomePage/HomePage'
 // import ChannelItem from '@/components/ChannelItem/ChannelItem'
@@ -165,7 +166,7 @@ router.beforeEach((to, from, next) => {
               return next()
             }, (err) => {
               // 如果刷新令牌失败
-              next(err)
+              next(new RouteError(502, null, err.stack))
             })
           } else {
             // 跳转到微信的授权
@@ -195,7 +196,7 @@ router.beforeEach((to, from, next) => {
           return next()
         }, (err) => {
           // 服务器登录失败
-          return next(err)
+          return next(new RouteError(502, null, err.stack))
         })
       }
     }
@@ -239,12 +240,16 @@ router.beforeEach((to, from, next) => {
 })
 
 router.onError((err) => {
-  switch (err.id) {
+  switch (err.code) {
+    case 302:
+      clearTimeout(timeId)
+      store.commit(types.UPDATE_LOADING_STATE, { isLoading: false })
+      router.replace(err.nextRouteParams)
+      break;
     case 401:
-      //
-      // if () {
-
-      // }
+      break;
+    case 503:
+      console.error(err)
   }
 })
 

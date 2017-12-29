@@ -97,10 +97,9 @@ import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import * as api from '../../http/api'
 import { Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
 import CanvasShareImage from './CanvasShareImage'
+import {RouteError} from '../../lib/MyError'
 export default {
-  directives: {
-    TransferDom
-  },
+  directives: { TransferDom },
   components: { Box, XButton, XDialog, CanvasShareImage, Cell },
   beforeRouteEnter(to, from, next) {
     var {orderId} = to.params
@@ -108,12 +107,16 @@ export default {
       var order = res.data
       // 如果订单用户与当前用户不一致，就跳转到首页
       if ( order.userId !== auth.getUserInfo().id ) {
-        router.replace({ name: 'channel_item', params: { channelId: order.channelId } })
+        var err = new RouteError(302, { name: 'channel_item', params: { channelId: order.channelId } }, `消费成功页面：当前用户ID与订单用户ID不一致`)
+        next(err)
+        return Promise.reject(err)
       } else {
         next( vm  => {
           vm.consumeChannelOrderLoaded( res.data )
         })
       }
+    }, err => {
+      console.log(err)
     })
   },
   computed: {

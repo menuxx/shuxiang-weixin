@@ -41,7 +41,7 @@
     <!--</div>-->
 
     <box gap="10px 10px">
-      <x-button @click.native="requestObtain" type="primary" class="request-obtain-btn" :disabled="primaryBtnDisable" :show-loading="primaryBtnDisable">{{ primaryBtnTxt }}</x-button>
+      <x-button @click.native="requestObtain" type="primary" class="request-obtain-btn" :disabled="primaryBtnDisable" :show-loading="primaryBtnLoading">{{ primaryBtnTxt }}</x-button>
     </box>
 
     <div v-transfer-dom>
@@ -86,6 +86,7 @@
     components: { Box, XButton, PartnerListView, Popup },
     data() {
       return {
+        primaryBtnLoading: false,
         primaryBtnDisable: true,
         primaryBtnTxt: '',
         showPartnerListView: false
@@ -94,36 +95,35 @@
     // 数据加载
     beforeRouteEnter (to, from, next) {
       var {channelId} = to.params
-      if (Number.isInteger(channelId)) {
-        Promise.all([
-          api.getVipChannelItem(channelId),
-          api.getVChannelOrders(channelId),
-          api.getMyChannelOrder(channelId)
-        ])
-        .then( res => {
-          next(vm => {
-            var title = getTitleTxt(res[0].data)
-            vm.updateTitle(title)
-            // mutation 更新 store 中的 channelItem
-            vm.channelPartnerLoaded( res[1].data )
-            vm.channelItemLoaded( res[0].data )
-            // 合并数据
-            // 如果存在 长轮训 id 就继续之前的操作
-            var loopRefId = getLoopRefId(channelId)
-            if ( !isEmpty(loopRefId) ) {
-                vm.continueLoopChannelState( loopRefId, channelId )
-            }
-            // 没有订单 id 就说明，该用户没有参与过，可以抢
-            if ( isEmpty(res[2].data.id) ) {
-              vm.primaryBtnDisable = true
-              vm.primaryBtnTxt = title
-            } else {
-              vm.primaryBtnDisable = false
-              vm.primaryBtnTxt = title + '(已抢到)'
-            }
-          })
+      Promise.all([
+        api.getVipChannelItem(channelId),
+        api.getVChannelOrders(channelId),
+        api.getMyChannelOrder(channelId)
+      ])
+      .then( res => {
+        next(vm => {
+          var title = getTitleTxt(res[0].data)
+          vm.updateTitle(title)
+          // mutation 更新 store 中的 channelItem
+          vm.channelPartnerLoaded( res[1].data )
+          vm.channelItemLoaded( res[0].data )
+          // 合并数据
+          // 如果存在 长轮训 id 就继续之前的操作
+          var loopRefId = getLoopRefId(channelId)
+          if ( !isEmpty(loopRefId) ) {
+              vm.continueLoopChannelState( loopRefId, channelId )
+          }
+          // 没有订单 id 就说明，该用户没有参与过，可以抢
+          if ( isEmpty(res[2].data.id) ) {
+            vm.primaryBtnDisable = false
+            vm.primaryBtnTxt = title
+          } else {
+            vm.primaryBtnDisable = true
+            vm.primaryBtnLoading = false
+            vm.primaryBtnTxt = title + '(已抢到)'
+          }
         })
-      }
+      })
     },
     computed: mapState({
       channelId: state => state.channelItem.channelId,
@@ -150,6 +150,7 @@
        */
       continueLoopChannelState(loopRefId, channelId) {
         this.primaryBtnDisable = true
+        this.primaryBtnLoading = true
         this.channelItemObtain(channelId).then( stateCode => {
           this.requestObtainResult(stateCode)
         })
@@ -216,6 +217,7 @@
       // 开始抢购
       requestObtain() {
         this.primaryBtnDisable = true
+        this.primaryBtnLoading = true
         this.channelItemObtain(this.channelId).then(stateCode => {
           this.requestObtainResult(stateCode)
         })

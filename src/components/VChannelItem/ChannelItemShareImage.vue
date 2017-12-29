@@ -7,71 +7,39 @@
   </div>
 </template>
 <script>
-  import qiniuUpload from '../../lib/qiniu-upload'
-const html = `
-<div class="sx-container">
+  const html = `
+<div class="page-container">
   <style type="text/css">
     html, body {
       background-color: #ffffff;
-      padding: 0; margin: 0;
+      margin: 0;
+      padding: 0;
     }
-    .sx-container {
-      padding: 70px 0;
-      width: 750px;
-      height: 1194px;
-      font-size: 30px;
+    .page-container {
+      color: #000;
+      font-size: 36px;
+      width: 630px;
+      height: 1334px;
+      padding: 0 60px;
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-around;
     }
-    .avatar-next-to-section {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .avatar-next-to-section .avatar {
-      width: 170px;
-      border-radius: 50%;
-    }
-    .avatar-next-to-section .channel-image {
-      margin-right: 20px;
-    }
-    .avatar-next-to-section .obtain-user {
-      margin-left: 20px;
-    }
-    .avatar-next-to-section .sx-exchange-icon {
-      width: 100px;
-      height: 100px;
-    }
-    .slogan-text {
-      margin: 10px 0;
-    }
-    .ranking-section {
-      display: flex;
-      flex-flow: row nowrap;
-      align-items: center;
-      justify-content: center;
-      color: #F3A536;
-      font-size: 45px;
-      margin-bottom: 10px;
-    }
-    .ranking-section .ranking-icon {
+    .cover-image {
       display: block;
-      height: 100px;
-      width: 100px;
+      width: 630px;
+      height: 630px;
     }
-    .item-image-wrap {
-      padding: 10px 0;
-      display: flex;
-      justify-content: center;
+    .channel-owner {
+      margin-bottom: 20px;
     }
-    .item-image-wrap .item-image {
-      display: block;
-      width: 550px;
-      height: 550px;
+    .channel-owner .gift-txt {
+      text-align: left;
+      margin: 0;
     }
-    .slogan-text {
-      text-align: center;
+    .channel-owner .owner-name {
+      text-align: right;
+      margin: 0;
     }
     .qrcode-wrap {
       display: flex;
@@ -79,38 +47,28 @@ const html = `
       justify-content: space-between;
       align-items: center;
     }
-    .qrcode-wrap .desc-info-sm {
-      margin: 0;
-      font-size: 20px;
-      text-align: center;
-      color: #b5b1b5;
-    }
     .qrcode-wrap .qrcode-image {
       display: block;
       width: 200px;
       height: 200px;
       margin-bottom: 20px;
     }
+    .desc-info-sm {
+      color: #b5b1b5;
+      font-size: 20px;
+      text-align: center;
+    }
   </style>
-  <div class="avatar-next-to-section">
-    <img class="channel-image avatar" src="{{ ownerAvatarUrl }}">
-    <img class="sx-exchange-icon" src="/ic_giftbook.png">
-    <img class="obtain-user avatar" src="{{ userAvatarUrl }}">
+  <img class="cover-image" src="/static/raw_1512110740.jpeg" />
+  <div class="channel-owner">
+    <p class="gift-txt">
+      当认清决定命运的因素之后，当了解古今中外各种被命运垂青的人的思维方式之后，能够用他们的指导自己行动一一相信，你就会有好命运。
+    </p>
+    <p class="owner-name">---- 雷军</p>
   </div>
-
-  <p class="slogan-text">{{ userName }}成功领取{{ ownerName }}送出的新书《见识》</p>
-
-  <div class="ranking-section">
-    <img class="ranking-icon" src="/ic_queue.png">第<span class="ranking-num">{{ queueNum }}</span>名
-  </div>
-
-  <div class="item-image-wrap">
-    <img class="item-image" src="{{ itemCoverImageUrl }}">
-  </div>
-
   <div class="qrcode-wrap">
-    <img class="qrcode-image" src="{{ shopUrlQrcodeUrl }}" />
-    <p class="desc-info-sm">扫码领优惠券</p>
+    <img class="qrcode-image" src="/static/7f960e2023fb5944592f615e20e4eef81.png" />
+    <p class="desc-info-sm">雷军送出500本新书, 扫码领取</p>
   </div>
 </div>`
   import config from '../../config'
@@ -118,7 +76,8 @@ const html = `
   import {makeQrcodeDataUrl} from '../../lib/image'
   import * as rasterizeHTML from 'rasterizehtml'
   import dataURLtoBlob from 'blueimp-canvas-to-blob'
-  import {InlineLoading} from 'vux';
+  import {InlineLoading} from 'vux'
+
   export default {
     components: {InlineLoading},
     data() {
@@ -169,22 +128,3 @@ const html = `
     }
   }
 </script>
-<style scoped lang="scss">
-  .sx-container {
-    display: flex;
-    justify-content: center;
-  }
-  .img-wrap {
-    height: 400px;
-    width: 224px;
-    display: flex;
-    justify-content: center;
-    .image {
-      border: 0;
-      width: 100%;
-    }
-  }
-  .canvas-hide {
-    display: none;
-  }
-</style>

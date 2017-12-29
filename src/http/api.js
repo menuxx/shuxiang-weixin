@@ -33,7 +33,11 @@ export const getMyChannelOrder = channelId => {
  * @returns {AxiosPromise<any>}
  */
 export const getVChannelStoreUserState = (channelId, loopRefId='') => {
-  return http.get(`/v_channel_store/${channelId}/user_state?loopRefId=${loopRefId}`)
+  var loopRefIdQs = ''
+  if ( /[0-9]*:.*/.test(loopRefId)) {
+    loopRefIdQs = `loopRefId=${loopRefId}`
+  }
+  return http.get(`/v_channel_store/${channelId}/user_state?${loopRefIdQs}`)
 }
 
 

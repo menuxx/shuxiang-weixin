@@ -166,6 +166,7 @@ import * as api from '../../http/api'
 import {States} from '../../obtainItem'
 import isEmpty from 'is-empty'
 import router from '../../router'
+import {RouteError} from '../../lib/MyError'
 import {addressToPath, addressReturnFrom} from '../../weixin'
 import {getLoopRefId, setLoopRefId, debounceLoopChannelState} from '../../obtainItem'
 
@@ -214,8 +215,9 @@ export default {
     api.getVChannelStoreUserState(channelId, getLoopRefId(channelId)).then( res => {
       // 如果消费状态不知已持有，就返回上一级页面
       if ( res.data.stateCode !== States.Obtain ) {
-        router.replace({ name: 'channel_item', params: { channelId } })
-        return Promise.reject(new Error(`stateCode = ${res.data.stateCode}, 不满足 stateCode === ${States.Obtain}`))
+        var err = new RouteError(302, { name: 'channel_item', params: { channelId } }, `stateCode = ${res.data.stateCode}, 不满足 stateCode === ${States.Obtain}`)
+        next(err)
+        return Promise.reject(err)
       }
       return Promise.resolve(res.data.stateCode)
     }).then( stateCode => {
@@ -236,6 +238,8 @@ export default {
           vm.updateReceiver( receiverAddress )
         }
       })
+    }, err => {
+      console.log(err)
     })
   },
   methods: {

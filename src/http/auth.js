@@ -22,7 +22,7 @@ export const buildAuthAuthorizeUrl = (appId, redirectUrl) => {
  */
 export const getUserInfo = () => {
   if ( !isEmpty(getMyAuthToken()) ) {
-    return localStorage[USERINFO_STORAGE_KEY].data
+    return JSON.parse(localStorage.getItem(USERINFO_STORAGE_KEY)).data
   }
 }
 
