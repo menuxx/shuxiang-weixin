@@ -149,7 +149,7 @@
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
             .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
-            .replace('{{ ownerName }}', data.ownerName )
+            .replace('{{ ownerName }}', data.ownerName ).replace('{{ ownerName }}', data.ownerName )
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
             .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
@@ -174,7 +174,7 @@
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
             .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
-            .replace('{{ ownerName }}', data.ownerName )
+            .replace('{{ ownerName }}', data.ownerName ).replace('{{ ownerName }}', data.ownerName )
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
             .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
