@@ -1,5 +1,6 @@
 <template>
-  <div class="sx-container">
+  <div class="page-container">
+    <div ref="renderBox" class="render-box"></div>
     <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
     <div class="img-wrap">
       <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
@@ -9,13 +10,13 @@
 <script>
   import qiniuUpload from '../../lib/qiniu-upload'
 const html = `
-<div class="sx-container">
+<div class="xs__container" id="__xsDOMImageContainer">
   <style type="text/css">
     html, body {
       background-color: #ffffff;
       padding: 0; margin: 0;
     }
-    .sx-container {
+    .xs__container {
       padding: 70px 0;
       width: 750px;
       height: 1194px;
@@ -114,11 +115,9 @@ const html = `
   </div>
 </div>`
   import config from '../../config'
-  import {makeSameOriginUrl} from '../../lib/util'
+  import {makeSameOriginUrl, isAndroid, isIOS} from '../../lib/util'
   import {makeQrcodeDataUrl} from '../../lib/image'
-  import * as rasterizeHTML from 'rasterizehtml'
-  import dataURLtoBlob from 'blueimp-canvas-to-blob'
-  import {InlineLoading} from 'vux';
+  import {InlineLoading} from 'vux'
   export default {
     components: {InlineLoading},
     data() {
@@ -128,49 +127,97 @@ const html = `
     },
     methods: {
       onImageClick() {
+        console.log(this.imgSrc)
         this.$wechat.previewImage({
           current: this.imgSrc,
           urls: [this.imgSrc]
         })
       },
       onDraw(data) {
-        var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
-        _html = _html.replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
-          .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
-          .replace('{{ ownerName }}', data.ownerName )
-          .replace('{{ queueNum }}', data.queueNum )
-          .replace('{{ userName }}', data.userName )
-          .replace('{{ userAvatarUrl }}', data.userAvatarUrl )
-          .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl )
-        rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
-          try {
-            this.$refs.canvas.toBlob( blob => {
-              qiniuUpload({
-                file: blob,
-                data: {
-                  keyPrefix: config.QiNiuImagePrefix.share
-                },
-                onProgress: () => {},
-                onSuccess: (res) => {
-                  this.imgSrc = config.QiNiuBaseUrl + res.key
-                },
-                onError: (err) => {
-                  console.log(err)
-                }
-              })
-            }, 'image/png', 0.95)
-          } catch (e) {
-            console.log(e)
+        if ( isIOS() ) {
+          this.onDrawIOS(data)
+        } else if (isAndroid()) {
+          this.onDrawAndroid(data)
+        } else { // android
+          this.onDrawAndroid(data)
+        }
+      },
+      updateToQiniu(blob) {
+        qiniuUpload({
+          file: blob,
+          data: {
+            keyPrefix: config.QiNiuImagePrefix.share
+          },
+          onProgress: () => {},
+          onSuccess: (res) => {
+            this.imgSrc = config.QiNiuBaseUrl + res.key
+          },
+          onError: (err) => {
+            console.log(err)
           }
-        }, err => {
-          console.log('An error occured:', err);
-        });
+        })
+      },
+      onDrawIOS (data) {
+        console.log('onDrawIOS')
+        // 只有 ios 环境才执行相关依赖
+        require.ensure([], () => {
+          var html2canvas = require('html2canvas')
+          require('blueimp-canvas-to-blob') // polyfily
+          var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
+          _html = _html
+            .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
+            .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
+            .replace('{{ ownerName }}', data.ownerName )
+            .replace('{{ queueNum }}', data.queueNum )
+            .replace('{{ userName }}', data.userName )
+            .replace('{{ userAvatarUrl }}', data.userAvatarUrl )
+            .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl )
+          this.$refs.renderBox.innerHTML = _html
+          try {
+            html2canvas(document.querySelector("#__xsDOMImageContainer")).then( canvas => {
+              this.$refs.renderBox.style.display = 'none';
+              console.log('11111111')
+              canvas.toBlob( blob => { this.updateToQiniu(blob) }, 'image/png')
+            }, err => {
+              console.log(err)
+            })
+          } catch (e) {
+            console.error(e)
+          }
+        })
+      },
+      onDrawAndroid(data) {
+        console.log('onDrawAndroid')
+        // 使用 延迟加载 ，只有 android 环境才加载相关依赖
+        require.ensure([], function(require){
+          var rasterizeHTML = require('rasterizehtml')
+          require('blueimp-canvas-to-blob') // polyfily
+          var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
+          _html = _html
+            .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
+            .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
+            .replace('{{ ownerName }}', data.ownerName )
+            .replace('{{ queueNum }}', data.queueNum )
+            .replace('{{ userName }}', data.userName )
+            .replace('{{ userAvatarUrl }}', data.userAvatarUrl )
+            .replace('{{ ownerAvatarUrl }}', data.ownerAvatarUrl )
+          rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
+            this.$refs.canvas.toBlob( blob => { this.updateToQiniu(blob) }, "image/png")
+          }, err => {
+            console.log('An error occured:', err);
+          });
+        })
       }
     }
   }
 </script>
 <style scoped lang="scss">
-  .sx-container {
+  .render-box {
+  }
+  .render-box {
+
+  }
+  .page-container {
     display: flex;
     justify-content: center;
   }

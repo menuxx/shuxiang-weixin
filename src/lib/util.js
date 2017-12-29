@@ -1,4 +1,5 @@
 
+import {Domain} from '../config'
 
 export const makeSameOriginUrl = function (url) {
   if ( url.startsWith('http://') ) {
@@ -6,5 +7,13 @@ export const makeSameOriginUrl = function (url) {
   } else if ( url.startsWith('https://') )  {
     url = url.replace('https://', '')
   }
-  return `http://wxtest.qurenjia.com/proxy/${url}`
+  return `${Domain.SiteBaseUrl}/proxy/${url}`
+}
+
+export const isAndroid = function () {
+  return /android/i.test(userAgent)
+}
+
+export const isIOS = function () {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
 }

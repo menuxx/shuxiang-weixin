@@ -136,14 +136,11 @@ export default {
         this.$refs.shareImage.onDraw({
           queueNum: details.queueNum,
           shopUrl: details.vChannel.item.shopUrl,
-          // itemCoverImageUrl: cdnFullUrl(details.vChannel.item.coverImage, config.QiNiuImagePrefix.item),
-          itemCoverImageUrl: '/E46D8adKSD.jpg',
+          itemCoverImageUrl: cdnFullUrl(details.vChannel.item.coverImage, config.QiNiuImagePrefix.item),
           ownerName: details.vChannel.ownerName,
           userName: details.user.userName,
-          // userAvatarUrl: details.user.avatarUrl,
-          userAvatarUrl: '/1111222.jpg',
-          // ownerAvatarUrl: cdnFullUrl(details.vChannel.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
-          ownerAvatarUrl: '/1111222.jpg'
+          userAvatarUrl: details.user.avatarUrl,
+          ownerAvatarUrl: cdnFullUrl(details.vChannel.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
         })
       },
       onShareVChannel() {
