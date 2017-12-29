@@ -25,29 +25,29 @@ const html = `
       flex-flow: column nowrap;
       justify-content: space-around;
     }
-    .avatar-next-to-section {
+    .xs__container .avatar-next-to-section {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .avatar-next-to-section .avatar {
+    .xs__container .avatar-next-to-section .avatar {
       width: 170px;
       border-radius: 50%;
     }
-    .avatar-next-to-section .channel-image {
+    .xs__container .avatar-next-to-section .channel-image {
       margin-right: 20px;
     }
-    .avatar-next-to-section .obtain-user {
+    .xs__container .avatar-next-to-section .obtain-user {
       margin-left: 20px;
     }
-    .avatar-next-to-section .sx-exchange-icon {
+    .xs__container .avatar-next-to-section .sx-exchange-icon {
       width: 100px;
       height: 100px;
     }
-    .slogan-text {
+    .xs__container .slogan-text {
       margin: 10px 0;
     }
-    .ranking-section {
+    .xs__container .ranking-section {
       display: flex;
       flex-flow: row nowrap;
       align-items: center;
@@ -56,37 +56,37 @@ const html = `
       font-size: 45px;
       margin-bottom: 10px;
     }
-    .ranking-section .ranking-icon {
+    .xs__container .ranking-section .ranking-icon {
       display: block;
       height: 100px;
       width: 100px;
     }
-    .item-image-wrap {
+    .xs__container .item-image-wrap {
       padding: 10px 0;
       display: flex;
       justify-content: center;
     }
-    .item-image-wrap .item-image {
+    .xs__container .item-image-wrap .item-image {
       display: block;
       width: 550px;
       height: 550px;
     }
-    .slogan-text {
+    .xs__container .slogan-text {
       text-align: center;
     }
-    .qrcode-wrap {
+    .xs__container .qrcode-wrap {
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-between;
       align-items: center;
     }
-    .qrcode-wrap .desc-info-sm {
+    .xs__container .qrcode-wrap .desc-info-sm {
       margin: 0;
       font-size: 20px;
       text-align: center;
       color: #b5b1b5;
     }
-    .qrcode-wrap .qrcode-image {
+    .xs__container .qrcode-wrap .qrcode-image {
       display: block;
       width: 200px;
       height: 200px;
@@ -127,7 +127,6 @@ const html = `
     },
     methods: {
       onImageClick() {
-        console.log(this.imgSrc)
         this.$wechat.previewImage({
           current: this.imgSrc,
           urls: [this.imgSrc]
@@ -176,7 +175,6 @@ const html = `
           try {
             html2canvas(document.querySelector("#__xsDOMImageContainer")).then( canvas => {
               this.$refs.renderBox.style.display = 'none';
-              console.log('11111111')
               canvas.toBlob( blob => { this.updateToQiniu(blob) }, 'image/png')
             }, err => {
               console.log(err)
@@ -213,9 +211,9 @@ const html = `
 </script>
 <style scoped lang="scss">
   .render-box {
-  }
-  .render-box {
-
+    position: absolute;
+    right: 1000px;
+    top: 1000px;
   }
   .page-container {
     display: flex;
