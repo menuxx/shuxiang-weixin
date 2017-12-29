@@ -25,14 +25,6 @@ Vue.use(Router)
 const router = new Router({
   routes: [
     {
-      // 分享图片
-      path: '/v_channels/:channelId/share_image',
-      name: 'v_channel_share_image',
-      component: function(resolve) {
-        require(['../components/VChannelShareImage/VChannelShareImage'], resolve)
-      }
-    },
-    {
       path: '/test1',
       component: function(resolve) {
         require(['../components/Test/Test'], resolve)
@@ -83,11 +75,15 @@ const router = new Router({
         require(['../components/ConsumeObtainSuccess/ConsumeSuccess'], resolve)
       }
     },
-    // {
-    //   // 成功抢购后的分享页面
-    //   path: '/consume_obtain_success/:itemId/share_image',
-    //   component: CanvasImageShare
-    // },
+    {
+      // 成功抢购后的分享页面
+      path: '/v_channels/:channelId/share_image',
+      name: 'channel_item_share',
+      meta: { needAuth: true },
+      component: function (resolve) {
+        require(['../components/VChannelItem/ShareImage'], resolve)
+      }
+    },
     {
       // 用户收货地址管理
       path: '/user_address',

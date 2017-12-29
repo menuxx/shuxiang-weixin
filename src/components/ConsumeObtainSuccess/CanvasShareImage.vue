@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="sx-container">
     <div ref="renderBox" class="render-box"></div>
     <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
     <div class="img-wrap">
@@ -8,15 +8,14 @@
   </div>
 </template>
 <script>
-  import qiniuUpload from '../../lib/qiniu-upload'
 const html = `
-<div class="xs__container" id="__xsDOMImageContainer">
+<div class="sx__container" id="__sxDOMImageContainer">
   <style type="text/css">
     html, body {
       background-color: #ffffff;
       padding: 0; margin: 0;
     }
-    .xs__container {
+    .sx__container {
       padding: 70px 0;
       width: 750px;
       height: 1194px;
@@ -24,30 +23,33 @@ const html = `
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-around;
+      font-family: "Helvetica Neue",Helvetica,"Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .xs__container .avatar-next-to-section {
+    .sx__container .avatar-next-to-section {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .xs__container .avatar-next-to-section .avatar {
+    .sx__container .avatar-next-to-section .avatar {
       width: 170px;
       border-radius: 50%;
     }
-    .xs__container .avatar-next-to-section .channel-image {
+    .sx__container .avatar-next-to-section .channel-image {
       margin-right: 20px;
     }
-    .xs__container .avatar-next-to-section .obtain-user {
+    .sx__container .avatar-next-to-section .obtain-user {
       margin-left: 20px;
     }
-    .xs__container .avatar-next-to-section .sx-exchange-icon {
+    .sx__container .avatar-next-to-section .sx-exchange-icon {
       width: 100px;
       height: 100px;
     }
-    .xs__container .slogan-text {
+    .sx__container .slogan-text {
       margin: 10px 0;
     }
-    .xs__container .ranking-section {
+    .sx__container .ranking-section {
       display: flex;
       flex-flow: row nowrap;
       align-items: center;
@@ -56,37 +58,37 @@ const html = `
       font-size: 45px;
       margin-bottom: 10px;
     }
-    .xs__container .ranking-section .ranking-icon {
+    .sx__container .ranking-section .ranking-icon {
       display: block;
       height: 100px;
       width: 100px;
     }
-    .xs__container .item-image-wrap {
+    .sx__container .item-image-wrap {
       padding: 10px 0;
       display: flex;
       justify-content: center;
     }
-    .xs__container .item-image-wrap .item-image {
+    .sx__container .item-image-wrap .item-image {
       display: block;
       width: 550px;
       height: 550px;
     }
-    .xs__container .slogan-text {
+    .sx__container .slogan-text {
       text-align: center;
     }
-    .xs__container .qrcode-wrap {
+    .sx__container .qrcode-wrap {
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-between;
       align-items: center;
     }
-    .xs__container .qrcode-wrap .desc-info-sm {
+    .sx__container .qrcode-wrap .desc-info-sm {
       margin: 0;
       font-size: 20px;
       text-align: center;
       color: #b5b1b5;
     }
-    .xs__container .qrcode-wrap .qrcode-image {
+    .sx__container .qrcode-wrap .qrcode-image {
       display: block;
       width: 200px;
       height: 200px;
@@ -114,6 +116,7 @@ const html = `
     <p class="desc-info-sm">扫码领优惠券</p>
   </div>
 </div>`
+  import qiniuUpload from '../../lib/qiniu-upload'
   import config from '../../config'
   import {makeSameOriginUrl, isAndroid, isIOS} from '../../lib/util'
   import {makeQrcodeDataUrl} from '../../lib/image'
@@ -173,7 +176,7 @@ const html = `
             .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
           this.$refs.renderBox.innerHTML = _html
           try {
-            html2canvas(document.querySelector("#__xsDOMImageContainer")).then( canvas => {
+            html2canvas(document.querySelector("#__sxDOMImageContainer")).then( canvas => {
               this.$refs.renderBox.style.display = 'none';
               canvas.toBlob( blob => { this.updateToQiniu(blob) }, 'image/png')
             }, err => {
@@ -215,7 +218,7 @@ const html = `
     right: 1000px;
     top: 1000px;
   }
-  .page-container {
+  .sx-container {
     display: flex;
     justify-content: center;
   }

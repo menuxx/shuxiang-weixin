@@ -1,21 +1,23 @@
 <template>
   <div class="xs-container">
+    <div ref="renderBox" class="render-box"></div>
     <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
     <div class="img-wrap">
       <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
     </div>
+    <inline-loading v-show="showLoading"></inline-loading>
   </div>
 </template>
 <script>
   const html = `
-<div class="xs__container">
+<div class="sx__container" id="__sxDOMImageContainer">
   <style type="text/css">
     html, body {
       background-color: #ffffff;
       margin: 0;
       padding: 0;
     }
-    .xs__container {
+    .sx__container {
       color: #000;
       font-size: 36px;
       width: 630px;
@@ -24,36 +26,39 @@
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-around;
+      font-family: "Helvetica Neue",Helvetica,"Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .xs__container .cover-image {
+    .sx__container .cover-image {
       display: block;
       width: 630px;
       height: 630px;
     }
-    .xs__container .channel-owner {
+    .sx__container .channel-owner {
       margin-bottom: 20px;
     }
-    .xs__container .channel-owner .gift-txt {
+    .sx__container .channel-owner .gift-txt {
       text-align: left;
       margin: 0;
     }
-    .xs__container .channel-owner .owner-name {
+    .sx__container .channel-owner .owner-name {
       text-align: right;
       margin: 0;
     }
-    .xs__container .qrcode-wrap {
+    .sx__container .qrcode-wrap {
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-between;
       align-items: center;
     }
-    .xs__container .qrcode-wrap .qrcode-image {
+    .sx__container .qrcode-wrap .qrcode-image {
       display: block;
       width: 200px;
       height: 200px;
       margin-bottom: 20px;
     }
-    .xs__container .desc-info-sm {
+    .sx__container .desc-info-sm {
       color: #b5b1b5;
       font-size: 20px;
       text-align: center;
@@ -71,17 +76,37 @@
     <p class="desc-info-sm">{{ ownerName }}送出{{ stock }}本新书, 扫码领取</p>
   </div>
 </div>`
+  import * as api from '../../http/api'
   import config from '../../config'
+  import {cdnFullUrl} from '../../filters'
+  import qiniuUpload from '../../lib/qiniu-upload'
   import {makeSameOriginUrl, isAndroid, isIOS} from '../../lib/util'
   import {makeQrcodeDataUrl} from '../../lib/image'
+  import 'blueimp-canvas-to-blob' // polyfily
   import {InlineLoading} from 'vux'
 
   export default {
     components: {InlineLoading},
     data() {
       return {
+        showLoading: true,
         imgSrc: null
       }
+    },
+    beforeRouteEnter(to, from, next) {
+      var {channelId} = to.params
+      api.getVipChannelItem(channelId).then( res => {
+        var channel = res.data
+          next( vm => {
+            vm.onDraw({
+              itemCoverImageUrl: cdnFullUrl(channel.item.coverImage, config.QiNiuImagePrefix.item),
+              ownerName: channel.ownerName,
+              giftTxt: channel.giftTxt,
+              stock: channel.stock,
+              channelItemQrcodeUrl: makeQrcodeDataUrl(config.Domain.SiteBaseUrl + `?#/channels/${channelId}/item`)
+            })
+          })
+      })
     },
     methods: {
       onImageClick() {
@@ -91,6 +116,7 @@
         })
       },
       onDraw(data) {
+        console.log(data)
         if ( isIOS() ) {
           this.onDrawIOS(data)
         } else if (isAndroid()) {
@@ -108,6 +134,7 @@
           onProgress: () => {},
           onSuccess: (res) => {
             this.imgSrc = config.QiNiuBaseUrl + res.key
+            this.showLoading = false
           },
           onError: (err) => {
             console.log(err)
@@ -119,17 +146,16 @@
         // 只有 ios 环境才执行相关依赖
         require.ensure([], () => {
           var html2canvas = require('html2canvas')
-          require('blueimp-canvas-to-blob') // polyfily
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
-            .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
+            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
             .replace('{{ ownerName }}', data.ownerName )
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
             .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
           this.$refs.renderBox.innerHTML = _html
           try {
-            html2canvas(document.querySelector("#__xsDOMImageContainer")).then( canvas => {
+            html2canvas(document.querySelector("#__sxDOMImageContainer")).then( canvas => {
               this.$refs.renderBox.style.display = 'none';
               canvas.toBlob( blob => { this.updateToQiniu(blob) }, 'image/png')
             }, err => {
@@ -145,10 +171,9 @@
         // 使用 延迟加载 ，只有 android 环境才加载相关依赖
         require.ensure([], function(require){
           var rasterizeHTML = require('rasterizehtml')
-          require('blueimp-canvas-to-blob') // polyfily
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
-            .replace('{{ itemCoverImageUrl }}', data.itemCoverImageUrl )
+            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
             .replace('{{ ownerName }}', data.ownerName )
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
@@ -163,3 +188,26 @@
     }
   }
 </script>
+<style scoped lang="scss">
+  .render-box {
+    position: absolute;
+    right: 1000px;
+    top: 1000px;
+  }
+  .sx-container {
+    display: flex;
+    justify-content: center;
+  }
+  .img-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    .image {
+      border: 0;
+      width: 100%;
+    }
+  }
+  .canvas-hide {
+    display: none;
+  }
+</style>
