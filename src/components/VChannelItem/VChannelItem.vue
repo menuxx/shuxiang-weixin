@@ -161,6 +161,7 @@
         switch (stateCode) {
           // 成功持有
           case States.Obtain:
+            console.log('States.Obtain')
             // 提交状态
             this.$router.push({ name: 'obtain_channel_item', params: { channelId: this.channelId } })
             break;
@@ -188,6 +189,7 @@
           if (errCode === 0 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
             setLoopRefId(channelId, loopRefId)
             return debounceLoopChannelState(channelId, loopRefId, (stateCode, next) => {
+              console.log('loop stateCode: ', stateCode)
               // 如果已经过期，就重新发起请求
               if ( stateCode === States.FreeObtain ) {
                 next(false) // 中断上一次循环, 开始新的循环

@@ -222,7 +222,7 @@ export default {
       return Promise.resolve(res.data.stateCode)
     }).then( stateCode => {
       var {addressId} = addressReturnFrom()
-      Promise.all([
+      return Promise.all([
         api.getVipChannelItem(channelId),
         getAddress(addressId)
       ])
