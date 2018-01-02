@@ -2,32 +2,37 @@
 
   <div class="sx-container">
 
-    <img class="item-image" :src="channelItem.item.coverImageUrl" :alt="channelItem.item.name"/>
+    <scroller height="-62" lock-x :scrollbar-x="false" :scrollbar-y="true" class="sx-channel-section-scroll">
 
-    <div class="item-author-section">
-      <p class="item-author-text">{{ channelItem.giftTxt }}</p>
-      <span class="item-author-name">----{{ channelItem.ownerName }}</span>
-    </div>
+      <div class="sx-channel-section-body">
 
-    <div class="item-stock-section">
-      <span class="item-stock-number">
-        <span class="item-stock-count">&nbsp;{{ channelItem.partnerCount }}&nbsp;</span>
-        <span class="item-stock-sp">/</span>
-        <span class="item-stock-total">{{ channelItem.stock }}</span>
-      </span>
-      <span class="item-unit">本</span>
-    </div>
+        <img class="item-image" :src="channelItem.item.coverImageUrl" :alt="channelItem.item.name"/>
 
-    <div class="obtain-partner-section" v-if="channelItem.partnerCount > 0">
-      <span class="partner-section-title">他们都抢到了</span>
-      <div class="partner-list-horizontal">
-        <img class="user-avatar" v-for="partner in channelItem.partners" :src="partner.user.avatarUrl" :alt="partner.user.userName" :key="partner.user.id"/>
-        <span class="more-btn" v-if="channelItem.partners.length > 1" @click="popupPartnerListView">更多</span>
+        <div class="item-author-section">
+          <p class="item-author-text">{{ channelItem.giftTxt }}</p>
+          <span class="item-author-name">----{{ channelItem.ownerName }}</span>
+        </div>
+
+        <div class="item-stock-section">
+          <span class="item-stock-number">
+            <span class="item-stock-count">&nbsp;{{ channelItem.partnerCount }}&nbsp;</span>
+            <span class="item-stock-sp">/</span>
+            <span class="item-stock-total">{{ channelItem.stock }}</span>
+          </span>
+          <span class="item-unit">本</span>
+        </div>
+
+        <div class="obtain-partner-section" v-if="channelItem.partnerCount > 0">
+          <span class="partner-section-title">他们都抢到了</span>
+          <div class="partner-list-horizontal">
+            <img class="user-avatar" v-for="partner in channelItem.partners" :src="partner.user.avatarUrl" :alt="partner.user.userName" :key="partner.user.id"/>
+            <span class="more-btn" v-if="channelItem.partners.length > 1" @click="popupPartnerListView">更多</span>
+          </div>
+        </div>
+
       </div>
-    </div>
 
-    <!--<div class="more-op-section">-->
-
+      <!--<div class="more-op-section">-->
       <!--<a class="sx-btn-circle btn-sm-share" @click="onShareChannel">-->
         <!--<i class="fa fa-share-alt-square" aria-hidden="true"></i>-->
         <!--<span class="btn-sm-name">分享</span>-->
@@ -37,11 +42,12 @@
         <!--<i class="fa fa-picture-o" aria-hidden="true"></i>-->
         <!--<span class="btn-sm-name">海报</span>-->
       <!--</a>-->
+      <!--</div>-->
 
-    <!--</div>-->
+    </scroller>
 
     <box gap="10px 10px">
-      <x-button @click.native="requestObtain" type="primary" class="request-obtain-btn" :disabled="primaryBtnDisable" :show-loading="primaryBtnLoading">{{ primaryBtnTxt }}</x-button>
+      <x-button @click.native="requestObtain" :type="primaryBtnType" class="request-obtain-btn" :disabled="primaryBtnDisable" :plain="primaryBtnDisable" :show-loading="primaryBtnLoading">{{ primaryBtnTxt }}</x-button>
     </box>
 
     <div v-transfer-dom>
@@ -68,7 +74,7 @@
   import isEmpty from 'is-empty'
   import {States} from '../../obtainItem'
   import PartnerListView from './PartnerList'
-  import { Box, XButton, Popup, TransferDomDirective as TransferDom } from 'vux'
+  import { Scroller, Box, XButton, Popup, TransferDomDirective as TransferDom } from 'vux'
 
   import {getLoopRefId, setLoopRefId, debounceLoopChannelState, loopChannelState} from '../../obtainItem'
   import store from '../../sotre'
@@ -83,9 +89,10 @@
 
   export default {
     directives: { TransferDom },
-    components: { Box, XButton, PartnerListView, Popup },
+    components: { Scroller, Box, XButton, PartnerListView, Popup },
     data() {
       return {
+        primaryBtnType: 'primary',
         primaryBtnLoading: false,
         primaryBtnDisable: true,
         primaryBtnTxt: '',
@@ -102,25 +109,37 @@
       ])
       .then( res => {
         next(vm => {
-          var title = getTitleTxt(res[0].data)
+          var channelItem = res[0].data
+          var partner = res[1].data
+          var title = getTitleTxt(channelItem)
           vm.updateTitle(title)
           // mutation 更新 store 中的 channelItem
-          vm.channelPartnerLoaded( res[1].data )
-          vm.channelItemLoaded( res[0].data )
+          vm.channelPartnerLoaded( partner )
+          vm.channelItemLoaded( channelItem )
           // 合并数据
           // 如果存在 长轮训 id 就继续之前的操作
           var loopRefId = getLoopRefId(channelId)
           if ( !isEmpty(loopRefId) ) {
               vm.continueLoopChannelState( loopRefId, channelId )
           }
-          // 没有订单 id 就说明，该用户没有参与过，可以抢
-          if ( isEmpty(res[2].data.id) ) {
-            vm.primaryBtnDisable = false
-            vm.primaryBtnTxt = title
+          // 如果库存已抢完
+          if ( partner.count === channelItem.stock || Date.now() > channelItem.endTime ) {
+             vm.primaryBtnDisable = true
+             vm.primaryBtnLoading = false
+             vm.primaryBtnTxt = '很遗憾，已经被抢光'
+             vm.primaryBtnType = ''
           } else {
-            vm.primaryBtnDisable = true
-            vm.primaryBtnLoading = false
-            vm.primaryBtnTxt = title + '(已抢到)'
+            // 没有订单 id 就说明，该用户没有参与过，可以抢
+            if ( isEmpty(res[2].data.id) ) {
+              vm.primaryBtnDisable = false
+              vm.primaryBtnTxt = title
+              vm.primaryBtnType = 'primary'
+            } else {
+              vm.primaryBtnDisable = true
+              vm.primaryBtnLoading = false
+              vm.primaryBtnTxt = '已抢到'
+              vm.primaryBtnType = ''
+            }
           }
         })
       })
@@ -231,8 +250,11 @@
 <style scoped lang="scss">
   @import "VChannelItem";
   .sx-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    height: 100%;
+  }
+  .sx-channel-section-body {
+    min-height: 660px;
+    margin: 10px 0;
   }
   .popup-tips {
     display: flex;

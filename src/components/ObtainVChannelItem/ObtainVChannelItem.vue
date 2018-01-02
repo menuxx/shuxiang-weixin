@@ -10,55 +10,65 @@
       </x-dialog>
     </div>
 
-    <div class="sx-address-section">
-      <div class="sx-address-item" v-if="isShowAddressSection">
-        <div class="sx-address-item_view">
-          <div class="p1">
-            <div class="line1">
-              <span class="receiver-name">{{ receiver.receiverName }}</span>
-              <span class="phone-number">{{ receiver.phoneNumber | phoneNumberBeautiful }}</span>
-            </div>
-            <div class="line2">
-              {{ receiver.province }}{{ receiver.city }}{{ receiver.county }}{{ receiver.detailInfo }}
+    <scroller height="-62" lock-x :scrollbar-x="false" :scrollbar-y="true" class="sx-consume-section-scroll">
+
+      <div class="sx-consume-section-body">
+
+        <div class="sx-address-section">
+          <div class="sx-address-item" v-if="isShowAddressSection">
+            <div class="sx-address-item_view">
+              <div class="p1">
+                <div class="line1">
+                  <span class="receiver-name">{{ receiver.receiverName }}</span>
+                  <span class="phone-number">{{ receiver.phoneNumber | phoneNumberBeautiful }}</span>
+                </div>
+                <div class="line2">
+                  {{ receiver.province }}{{ receiver.city }}{{ receiver.county }}{{ receiver.detailInfo }}
+                </div>
+              </div>
+              <div class="p2">
+                <a class="sx-btn-apply" @click="onChooseMoreAddress">
+                  <i v-if="!isShowChooseMoreAddressLoading" class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <inline-loading v-if="isShowChooseMoreAddressLoading"></inline-loading>
+                </a>
+              </div>
             </div>
           </div>
-          <div class="p2">
-            <a class="sx-btn-apply" @click="onChooseMoreAddress">
-              <i v-if="!isShowChooseMoreAddressLoading" class="fa fa-arrow-right" aria-hidden="true"></i>
-              <inline-loading v-if="isShowChooseMoreAddressLoading"></inline-loading>
-            </a>
+        </div>
+
+        <group gutter="0" v-if="!isShowAddressSection">
+          <cell @click.native="onChooseSysAddress" :title="addressLabels.sys" is-link :border-intent="false">
+            <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/plus.svg" />
+          </cell>
+          <cell @click.native="onChooseWxAddress" :title="addressLabels.weixin" is-link :border-intent="false" :disabled="false" :is-loading="wxChooseBtnLoading">
+            <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/wechat.svg" />
+          </cell>
+        </group>
+
+        <div class="book-list">
+          <div class="book-item">
+            <div class="col1">
+              <img class="item-thumb" :src="item.coverImageUrl">
+            </div>
+            <div class="col2">
+              <h4 class="item-name">{{ item.name }}</h4>
+              <p class="item-desc-text">{{ ownerName }}赠送-限1本</p>
+            </div>
           </div>
         </div>
+
       </div>
-    </div>
 
-    <group gutter="0" v-if="!isShowAddressSection">
-      <cell @click.native="onChooseSysAddress" :title="addressLabels.sys" is-link :border-intent="false">
-        <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/plus.svg" />
-      </cell>
-      <cell @click.native="onChooseWxAddress" :title="addressLabels.weixin" is-link :border-intent="false" :disabled="false" :is-loading="wxChooseBtnLoading">
-        <img slot="icon" width="20" style="display:block;margin-right:5px;" src="../../assets/wechat.svg" />
-      </cell>
-    </group>
+    </scroller>
 
-    <div class="book-list">
-      <div class="book-item">
-        <div class="col1">
-          <img class="item-thumb" :src="item.coverImageUrl">
-        </div>
-        <div class="col2">
-          <h4 class="item-name">{{ item.name }}</h4>
-          <p class="item-desc-text">{{ ownerName }}赠送-限1本</p>
+    <box gap="10px 10px">
+      <div class="sx-fixed-bottom">
+        <divider class="sx-spl">限时5分钟，立即下手</divider>
+        <div class="sx-bottom-bar">
+          <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false" :disabled="false">{{ ownerName }}送出 {{ stock }} 本新书，马上抢读</x-button>
         </div>
       </div>
-    </div>
-
-    <div class="sx-fixed-bottom">
-      <divider class="sx-spl">限时5分钟，立即下手</divider>
-      <div class="sx-bottom-bar">
-        <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false" :disabled="false">{{ ownerName }}送出 {{ stock }} 本新书，马上抢读</x-button>
-      </div>
-    </div>
+    </box>
 
   </div>
 
@@ -155,10 +165,14 @@
   .sx-bottom-bar {
     margin: 0 10px;
   }
+
+  .sx-consume-section-body {
+
+  }
 </style>
 <script>
 // 持有项目
-import { InlineLoading, XButton, CellBox,  Grid, GridItem, Divider, Cell, Group, XDialog, TransferDomDirective as TransferDom } from 'vux'
+import { Box, Scroller, InlineLoading, XButton, CellBox,  Grid, GridItem, Divider, Cell, Group, XDialog, TransferDomDirective as TransferDom } from 'vux'
 import NewAddressPanel from '@/components/EditAddress/NewAddressPanel'
 import { mapState, mapMutations } from 'vuex'
 import * as types from '../../sotre/types'
@@ -186,7 +200,9 @@ function getAddress(addressId) {
 
 export default {
   directives: { TransferDom },
-  components : { XButton, Divider, Grid, GridItem, Cell, CellBox, Group, XDialog, NewAddressPanel, InlineLoading },
+  components : {
+    Scroller, Box,
+    XButton, Divider, Grid, GridItem, Cell, CellBox, Group, XDialog, NewAddressPanel, InlineLoading },
   data() {
     return {
       isShowChooseMoreAddressLoading: false,

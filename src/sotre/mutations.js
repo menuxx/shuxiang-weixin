@@ -7,9 +7,10 @@ import * as types from './types'
 
 export default {
   [types.TITLE_UPDATE] (state, title) {
-    window.title = title
-    document.title = title
-    state.app.windowTitle = title
+    var newTitle = title + '_雪人读书'
+    window.title = newTitle
+    document.title = newTitle
+    state.app.windowTitle = newTitle
   },
   // 更新 app loading
   [types.UPDATE_LOADING_STATE] (state, payload) {

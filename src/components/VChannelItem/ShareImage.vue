@@ -1,5 +1,5 @@
 <template>
-  <div class="xs-container">
+  <div class="sx-container">
     <div ref="renderBox" class="render-box"></div>
     <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
     <div class="img-wrap">

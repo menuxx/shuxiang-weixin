@@ -1,5 +1,5 @@
 <template>
-  <div class="xs-container">
+  <div class="sx-container">
     <div class="sx-partner-list">
       <div class="sx-partner-item" v-for="p in partners">
         <div class="p1">
@@ -29,7 +29,7 @@
   }
 </script>
 <style lang="scss" scoped>
-.xs-container {
+.sx-container {
   background-color: #fff;
 }
 .sx-partner-list {
