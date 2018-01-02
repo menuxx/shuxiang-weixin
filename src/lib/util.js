@@ -11,7 +11,7 @@ export const makeSameOriginUrl = function (url) {
 }
 
 export const isAndroid = function () {
-  return /android/i.test(userAgent)
+  return /android/i.test(navigator.userAgent)
 }
 
 export const isIOS = function () {

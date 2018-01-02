@@ -116,7 +116,6 @@
         })
       },
       onDraw(data) {
-        console.log(data)
         if ( isIOS() ) {
           this.onDrawIOS(data)
         } else if (isAndroid()) {
@@ -143,6 +142,7 @@
       },
       onDrawIOS (data) {
         console.log('onDrawIOS')
+        var self = this;
         // 只有 ios 环境才执行相关依赖
         require.ensure([], () => {
           var html2canvas = require('html2canvas')
@@ -153,21 +153,22 @@
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
             .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
-          this.$refs.renderBox.innerHTML = _html
+          self.$refs.renderBox.innerHTML = _html
           try {
             html2canvas(document.querySelector("#__sxDOMImageContainer")).then( canvas => {
-              this.$refs.renderBox.style.display = 'none';
-              canvas.toBlob( blob => { this.updateToQiniu(blob) }, 'image/png')
+              self.$refs.renderBox.style.display = 'none';
+              canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/png')
             }, err => {
-              console.log(err)
+              console.log(err.message, err.stack, err)
             })
           } catch (e) {
-            console.error(e)
+            console.error(e.message, e.stack, e)
           }
         })
       },
       onDrawAndroid(data) {
         console.log('onDrawAndroid')
+        var self = this;
         // 使用 延迟加载 ，只有 android 环境才加载相关依赖
         require.ensure([], function(require){
           var rasterizeHTML = require('rasterizehtml')
@@ -178,11 +179,11 @@
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
             .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
-          rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
-            this.$refs.canvas.toBlob( blob => { this.updateToQiniu(blob) }, "image/png")
-          }, err => {
-            console.log('An error occured:', err);
-          });
+            rasterizeHTML.drawHTML(_html, self.$refs.canvas).then( result => {
+              self.$refs.canvas.toBlob( blob => { self.updateToQiniu(blob) }, "image/png")
+            }, err => {
+              console.log('An error occured:', err);
+            });
         })
       }
     }
@@ -200,11 +201,13 @@
   }
   .img-wrap {
     width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     .image {
       border: 0;
       width: 100%;
+      height: 100%;
     }
   }
   .canvas-hide {
