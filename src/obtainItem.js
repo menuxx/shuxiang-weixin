@@ -23,7 +23,7 @@ export const getLoopRefId = (channelId) => {
   // 保活10分钟
   if ( isEmpty(data) ) { return null }
   if ( isEmpty(data.meta) ) { return null }
-  if ( Date.now() - data.meta.createAt > 600 * 1000  ) {
+  if ( Date.now() - data.meta.createAt < 600 * 1000  ) {
     setLoopRefId(channelId, data.data)
     return data.data
   } else {
