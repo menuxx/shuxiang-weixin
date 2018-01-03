@@ -9,47 +9,48 @@
 </template>
 <script>
 const html = `
-<div class="sx__container" id="__sxDOMImageContainer">
+<div class="sx__container2" id="__sxDOMImageContainer">
   <style type="text/css">
     html, body {
       background-color: #ffffff;
       padding: 0; margin: 0;
     }
-    .sx__container {
-      padding: 70px 0;
-      width: 750px;
-      height: 1194px;
-      font-size: 30px;
+    .sx__container2 {
+      width: 630px;
+      height: 1334px;
+      font-size: 36px;
+      padding: 0 60px;
       display: flex;
-      flex-flow: column nowrap;
+      flex-flow: column wrap;
       justify-content: space-around;
+      align-items: center;
       font-family: "Helvetica Neue",Helvetica,"Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    .sx__container .avatar-next-to-section {
+    .sx__container2 .avatar-next-to-section {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .sx__container .avatar-next-to-section .avatar {
+    .sx__container2 .avatar-next-to-section .avatar {
       width: 170px;
       border-radius: 50%;
     }
-    .sx__container .avatar-next-to-section .channel-image {
+    .sx__container2 .avatar-next-to-section .channel-image {
       margin-right: 20px;
     }
-    .sx__container .avatar-next-to-section .obtain-user {
+    .sx__container2 .avatar-next-to-section .obtain-user {
       margin-left: 20px;
     }
-    .sx__container .avatar-next-to-section .sx-exchange-icon {
+    .sx__container2 .avatar-next-to-section .sx-exchange-icon {
       width: 100px;
       height: 100px;
     }
-    .sx__container .slogan-text {
+    .sx__container2 .slogan-text {
       margin: 10px 0;
     }
-    .sx__container .ranking-section {
+    .sx__container2 .ranking-section {
       display: flex;
       flex-flow: row nowrap;
       align-items: center;
@@ -58,37 +59,38 @@ const html = `
       font-size: 45px;
       margin-bottom: 10px;
     }
-    .sx__container .ranking-section .ranking-icon {
+    .sx__container2 .ranking-section .ranking-icon {
       display: block;
       height: 100px;
       width: 100px;
     }
-    .sx__container .item-image-wrap {
+    .sx__container2 .item-image-wrap {
       padding: 10px 0;
       display: flex;
+      flex-flow: row nowrap;
       justify-content: center;
     }
-    .sx__container .item-image-wrap .item-image {
+    .sx__container2 .item-image-wrap .item-image {
       display: block;
       width: 550px;
       height: 550px;
     }
-    .sx__container .slogan-text {
+    .sx__container2 .slogan-text {
       text-align: center;
     }
-    .sx__container .qrcode-wrap {
+    .sx__container2 .qrcode-wrap {
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-between;
       align-items: center;
     }
-    .sx__container .qrcode-wrap .desc-info-sm {
+    .sx__container2 .qrcode-wrap .desc-info-sm {
       margin: 0;
-      font-size: 20px;
+      font-size: 22px;
       text-align: center;
       color: #b5b1b5;
     }
-    .sx__container .qrcode-wrap .qrcode-image {
+    .sx__container2 .qrcode-wrap .qrcode-image {
       display: block;
       width: 200px;
       height: 200px;
@@ -118,6 +120,7 @@ const html = `
 </div>`
   import qiniuUpload from '../../lib/qiniu-upload'
   import config from '../../config'
+  import 'blueimp-canvas-to-blob' // polyfily
   import {makeSameOriginUrl, isAndroid, isIOS} from '../../lib/util'
   import {makeQrcodeDataUrl} from '../../lib/image'
   import {InlineLoading} from 'vux'
@@ -160,11 +163,11 @@ const html = `
         })
       },
       onDrawIOS (data) {
+        var self = this
         console.log('onDrawIOS')
         // 只有 ios 环境才执行相关依赖
         require.ensure([], () => {
           var html2canvas = require('html2canvas')
-          require('blueimp-canvas-to-blob') // polyfily
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
             .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
@@ -174,11 +177,10 @@ const html = `
             .replace('{{ userName }}', data.userName )
             .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
             .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
-          this.$refs.renderBox.innerHTML = _html
+          self.$refs.renderBox.innerHTML = _html
           try {
             html2canvas(document.querySelector("#__sxDOMImageContainer")).then( canvas => {
-              this.$refs.renderBox.style.display = 'none';
-              canvas.toBlob( blob => { this.updateToQiniu(blob) }, 'image/png')
+              canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/png')
             }, err => {
               console.log(err)
             })
@@ -188,11 +190,11 @@ const html = `
         })
       },
       onDrawAndroid(data) {
+        var self = this
         console.log('onDrawAndroid')
         // 使用 延迟加载 ，只有 android 环境才加载相关依赖
-        require.ensure([], function(require){
+        require.ensure([], (require) => {
           var rasterizeHTML = require('rasterizehtml')
-          require('blueimp-canvas-to-blob') // polyfily
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
             .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
@@ -202,8 +204,8 @@ const html = `
             .replace('{{ userName }}', data.userName )
             .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
             .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
-          rasterizeHTML.drawHTML(_html, this.$refs.canvas).then( result => {
-            this.$refs.canvas.toBlob( blob => { this.updateToQiniu(blob) }, "image/png")
+          rasterizeHTML.drawHTML(_html, self.$refs.canvas).then( result => {
+            self.$refs.canvas.toBlob( blob => { self.updateToQiniu(blob) }, "image/png")
           }, err => {
             console.log('An error occured:', err);
           });

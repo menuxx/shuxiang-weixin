@@ -25,6 +25,7 @@
       padding: 0 60px;
       display: flex;
       flex-flow: column nowrap;
+      align-items: center;
       justify-content: space-around;
       font-family: "Helvetica Neue",Helvetica,"Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -60,7 +61,7 @@
     }
     .sx__container .desc-info-sm {
       color: #b5b1b5;
-      font-size: 20px;
+      font-size: 22px;
       text-align: center;
     }
   </style>
@@ -156,7 +157,6 @@
           self.$refs.renderBox.innerHTML = _html
           try {
             html2canvas(document.querySelector("#__sxDOMImageContainer")).then( canvas => {
-              self.$refs.renderBox.style.display = 'none';
               canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/png')
             }, err => {
               console.log(err.message, err.stack, err)

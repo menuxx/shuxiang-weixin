@@ -1,22 +1,8 @@
 <template>
     <div class="sx-container">
-      <div class="exchange-next-to-section">
-        <img class="channel-image avatar" :src="myConsumeChannelOrderDetails.vChannel.ownerAvatarUrl">
-        <img class="exchange-icon" src="../../assets/ic_giftbook.png" />
-        <img class="obtain-user avatar" :src="myConsumeChannelOrderDetails.user.avatarUrl">
-      </div>
-      <p class="slogan-text">{{ myConsumeChannelOrderDetails.user.userName }}成功领取{{ myConsumeChannelOrderDetails.vChannel.ownerName }}送出的新书{{ myConsumeChannelOrderDetails.vChannel.item.name }}</p>
-      <div class="ranking-section">
-        <img class="ranking-icon" src="../../assets/ic_queue.png"> 第 <span class="ranking-num">{{ myConsumeChannelOrderDetails.queueNum }}</span> 名
-      </div>
-      <div class="item-image-wrap">
-        <img class="item-image" :src="myConsumeChannelOrderDetails.vChannel.item.coverImageUrl">
-      </div>
-      <box gap="10px 10px">
-        <x-button @click.native="onShareVChannel" type="primary">分享给好友</x-button>
-      </box>
+
       <div v-transfer-dom>
-        <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent', width: '224px' }">
+        <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent', width: '300px' }">
           <div class="share-image-wrap">
             <CanvasShareImage ref="shareImage" />
           </div>
@@ -25,10 +11,34 @@
           </cell>
         </x-dialog>
       </div>
+
+      <scroller height="-62" lock-x :scrollbar-x="false" :scrollbar-y="true" class="sx-share-section-scroll">
+
+        <div class="sx-share-section-body">
+          <div class="exchange-next-to-section">
+            <img class="channel-image avatar" :src="myConsumeChannelOrderDetails.vChannel.ownerAvatarUrl">
+            <img class="exchange-icon" src="../../assets/ic_giftbook.png" />
+            <img class="obtain-user avatar" :src="myConsumeChannelOrderDetails.user.avatarUrl">
+          </div>
+          <p class="slogan-text">{{ myConsumeChannelOrderDetails.user.userName }}成功领取{{ myConsumeChannelOrderDetails.vChannel.ownerName }}送出的新书{{ myConsumeChannelOrderDetails.vChannel.item.name }}</p>
+          <div class="ranking-section">
+            <img class="ranking-icon" src="../../assets/ic_queue.png"> 第 <span class="ranking-num">{{ myConsumeChannelOrderDetails.queueNum }}</span> 名
+          </div>
+          <div class="item-image-wrap">
+            <img class="item-image" :src="myConsumeChannelOrderDetails.vChannel.item.coverImageUrl">
+          </div>
+        </div>
+
+      </scroller>
+
+      <box gap="10px 10px">
+        <x-button @click.native="onShareVChannel" type="primary">分享给好友</x-button>
+      </box>
+
     </div>
 </template>
 <style lang="scss" scoped>
-.sx-container {
+.sx-share-section-body {
   margin-top: 10px;
 }
 .exchange-next-to-section {
@@ -92,15 +102,16 @@ import * as types from '../../sotre/types'
 import * as auth from '../../http/auth'
 import isEmpty from 'is-empty'
 import {cdnFullUrl} from '../../filters'
+import {freeLoopRefId} from '../../obtainItem'
 import router from '../../router'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import * as api from '../../http/api'
-import { Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
+import { Scroller, Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
 import CanvasShareImage from './CanvasShareImage'
 import {RouteError} from '../../lib/MyError'
 export default {
   directives: { TransferDom },
-  components: { Box, XButton, XDialog, CanvasShareImage, Cell },
+  components: { Scroller, Box, XButton, XDialog, CanvasShareImage, Cell },
   beforeRouteEnter(to, from, next) {
     var {orderId} = to.params
     api.getOrderDetailsById(orderId).then( res => {
@@ -111,6 +122,8 @@ export default {
         next(err)
         return Promise.reject(err)
       } else {
+        // 清除 refId
+        freeLoopRefId(order.channelId)
         next( vm  => {
           vm.consumeChannelOrderLoaded( res.data )
         })

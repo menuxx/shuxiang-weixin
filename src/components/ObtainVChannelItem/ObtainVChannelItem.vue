@@ -65,7 +65,7 @@
       <div class="sx-fixed-bottom">
         <divider class="sx-spl">限时5分钟，立即下手</divider>
         <div class="sx-bottom-bar">
-          <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false" :disabled="false">{{ ownerName }}送出 {{ stock }} 本新书，马上抢读</x-button>
+          <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false" :disabled="false">抢读</x-button>
         </div>
       </div>
     </box>
@@ -237,6 +237,7 @@ export default {
       }
       return Promise.resolve(res.data.stateCode)
     }).then( stateCode => {
+
       var {addressId} = addressReturnFrom()
       return Promise.all([
         api.getVipChannelItem(channelId),
