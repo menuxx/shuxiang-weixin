@@ -6,7 +6,6 @@ var config = {}
 if (isProd()) {
   config = {
     Domain: {
-      AuthEntryPointUrl: 'http://wxtest.qurenjia.com/wxauthcodetestredirect_2017',
       APIBaseUrl: 'http://wxtest.qurenjia.com/api',
       SiteBaseUrl: 'http://wxtest.qurenjia.com'
     }
@@ -16,7 +15,7 @@ if (isProd()) {
     Domain: {
       AuthEntryPointUrl: "http://wxtest.qurenjia.com/wxauthcodetestredirect_2017",
       APIBaseUrl: "http://wxdev.qurenjia.com/api",
-      SiteBaseUrl: 'http://wxtest.qurenjia.com'
+      SiteBaseUrl: "http://wxdev.qurenjia.com"
     }
   }
 }

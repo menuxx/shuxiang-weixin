@@ -6,7 +6,7 @@
         <cell title="添加收货地址" @click.native="showAddAddressDialog = false">
           <img width="20" style="display:block;margin-right:5px;" src="../../assets/close-empty.svg" />
         </cell>
-        <NewAddressPanel @submit="onNewAddressSubmit" />
+        <NewAddressPanel @submit="onNewAddressSubmit" /
       </x-dialog>
     </div>
 
