@@ -92,7 +92,7 @@
   align-items: center;
   justify-content: center;
   .item-image {
-    width: 650px;
+    width: 90%;
     display: block;
   }
 }
@@ -115,6 +115,7 @@
 }
 
 .canvas-hide {
+  background-color: #ffffff;
   display: none;
 }
 </style>
