@@ -222,7 +222,7 @@ export default {
 	  receiver: state => state.channelOrder.receiver,
     ownerName: state => state.channelItem.ownerName,
     stock: state => state.channelItem.stock,  // 库存
-    payAmount: state.channelItem.expressFee + state.channelItem.payFee
+    payAmount: state => state.channelItem.expressFee + state.channelItem.payFee
   }),
   /**
    * 1. 先过去用户默认地址(primary)

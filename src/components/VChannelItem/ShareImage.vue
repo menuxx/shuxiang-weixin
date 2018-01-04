@@ -33,7 +33,7 @@
     }
     .sx__container .cover-image {
       display: block;
-      width: 100%;
+      width: 650px;
     }
     .sx__container .channel-owner {
       margin-bottom: 20px;
