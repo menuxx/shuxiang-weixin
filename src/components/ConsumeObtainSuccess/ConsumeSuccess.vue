@@ -145,6 +145,7 @@ const html = `
     padding: 0; margin: 0;
   }
   .sx__container {
+    background: #ffffff;
     padding: 70px 0 50px 0;
     width: 750px;
     height: 1194px;
