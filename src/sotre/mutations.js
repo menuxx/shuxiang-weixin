@@ -58,6 +58,9 @@ export default {
   [types.MY_RECEIVER_ADDRESS_UPDATE] (state, receiverAddr) {
     state.channelOrder.receiver = receiverAddr
   },
+  [types.MY_ORDERS_LOADED] (state, orders) {
+    state.orders = orders
+  },
   // 地址更新
   [types.MY_ADDRESS_UPDATED] (state, updatedAddr) {
     state.addresses.forEach( (adr, index) => {

@@ -27,7 +27,7 @@ const router = new Router({
     {
       path: '/test1',
       component: function(resolve) {
-        require(['../components/Test/Test'], resolve)
+        require(['../components/ConsumeObtainSuccess/TestImage'], resolve)
       }
     },
     {

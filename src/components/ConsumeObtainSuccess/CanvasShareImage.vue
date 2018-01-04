@@ -103,7 +103,7 @@ const html = `
     <img class="obtain-user avatar" src="{{ userAvatarUrl }}">
   </div>
 
-  <p class="slogan-text">{{ userName }}成功领取{{ ownerName }}送出的新书《见识》</p>
+  <p class="slogan-text">{{ userName }}成功领取{{ ownerName }}送出的新书</p>
 
   <div class="ranking-section">
     <img class="ranking-icon" src="/ic_queue.png">第<span class="ranking-num">{{ queueNum }}</span>名
@@ -115,7 +115,7 @@ const html = `
 
   <div class="qrcode-wrap">
     <img class="qrcode-image" src="{{ shopUrlQrcodeUrl }}" />
-    <p class="desc-info-sm">扫码领优惠券</p>
+    <p class="desc-info-sm">扫码领取优惠券</p>
   </div>
 </div>`
   import qiniuUpload from '../../lib/qiniu-upload'

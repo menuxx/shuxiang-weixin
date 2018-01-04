@@ -6,7 +6,7 @@
         <cell title="添加收货地址" @click.native="showAddAddressDialog = false">
           <img width="20" style="display:block;margin-right:5px;" src="../../assets/close-empty.svg" />
         </cell>
-        <NewAddressPanel @submit="onNewAddressSubmit" /
+        <NewAddressPanel @submit="onNewAddressSubmit" />
       </x-dialog>
     </div>
 
@@ -53,6 +53,7 @@
             <div class="col2">
               <h4 class="item-name">{{ item.name }}</h4>
               <p class="item-desc-text">{{ ownerName }}赠送-限1本</p>
+              <span class="price" v-if="payAmount > 0">{{ payAmount | rmb }}</span>
             </div>
           </div>
         </div>
@@ -63,7 +64,7 @@
 
     <box gap="10px 10px">
       <div class="sx-fixed-bottom">
-        <divider class="sx-spl">限时5分钟，立即下手</divider>
+        <divider class="sx-spl">请于5分钟之内完成本次操作</divider>
         <div class="sx-bottom-bar">
           <x-button @click.native="requestConsumeObtain" type="primary" :show-loading="false" :disabled="false">抢读</x-button>
         </div>
@@ -220,7 +221,8 @@ export default {
     item: state => state.channelItem.item,
 	  receiver: state => state.channelOrder.receiver,
     ownerName: state => state.channelItem.ownerName,
-    stock: state => state.channelItem.stock  // 库存
+    stock: state => state.channelItem.stock,  // 库存
+    payAmount: state.channelItem.expressFee + state.channelItem.payFee
   }),
   /**
    * 1. 先过去用户默认地址(primary)

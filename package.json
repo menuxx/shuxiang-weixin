@@ -16,7 +16,7 @@
     "fastclick": "^1.0.6",
     "font-awesome": "^4.7.0",
     "font-awesome-webpack": "0.0.5-beta.2",
-    "html2canvas": "^1.0.0-alpha.6",
+    "html2canvas": "^1.0.0-alpha.8",
     "is-empty": "^1.2.0",
     "is-integer": "^1.0.7",
     "qrious": "^4.0.2",

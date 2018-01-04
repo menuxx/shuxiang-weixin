@@ -20,9 +20,9 @@
     .sx__container {
       color: #000;
       font-size: 36px;
-      width: 630px;
+      padding: 0 50px;
+      width: 650px;
       height: 1334px;
-      padding: 0 60px;
       display: flex;
       flex-flow: column nowrap;
       align-items: center;
@@ -33,8 +33,7 @@
     }
     .sx__container .cover-image {
       display: block;
-      width: 630px;
-      height: 630px;
+      width: 100%;
     }
     .sx__container .channel-owner {
       margin-bottom: 20px;
@@ -46,6 +45,7 @@
     .sx__container .channel-owner .owner-name {
       text-align: right;
       margin: 0;
+      font-weight: bold;
     }
     .sx__container .qrcode-wrap {
       display: flex;
@@ -149,7 +149,7 @@
           var html2canvas = require('html2canvas')
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
-            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
+            .replace('{{ itemCoverImageUrl }}', "/raw_1512110740.jpeg" || makeSameOriginUrl(data.itemCoverImageUrl) )
             .replace('{{ ownerName }}', data.ownerName ).replace('{{ ownerName }}', data.ownerName )
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
@@ -157,7 +157,7 @@
           self.$refs.renderBox.innerHTML = _html
           try {
             html2canvas(document.querySelector("#__sxDOMImageContainer")).then( canvas => {
-              canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/png')
+              canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/jpeg', 0.8)
             }, err => {
               console.log(err.message, err.stack, err)
             })
@@ -180,7 +180,7 @@
             .replace('{{ stock }}', data.stock )
             .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
             rasterizeHTML.drawHTML(_html, self.$refs.canvas).then( result => {
-              self.$refs.canvas.toBlob( blob => { self.updateToQiniu(blob) }, "image/png")
+              self.$refs.canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/jpeg', 0.8)
             }, err => {
               console.log('An error occured:', err);
             });

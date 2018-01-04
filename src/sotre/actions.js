@@ -75,24 +75,14 @@ export default {
     })
   },
 
-	/**
-	 * 根据 订单 状态筛选订单
-	 * 有分页机制
-	 */
-	loadMyOrders({commit}, { status, pageNum=1, pageSize=10 }) {
-		return api.loadMyOrders({ status, pageNum, pageSize }).then( res => {
-		  var orders = res.data
-			commit(types.MY_ORDERS_LOADED, orders)
-			return orders
-		})
-	},
-
   /**
    * 根据订单id获取订单详情
    */
   getOrderDetailsById({commit}, orderId) {
 	  return api.getOrderDetailsById(orderId).then( res => {
+      commit(types.MY_CONSUME_ORDER_LOADED, res.data)
 	    return res.data
     })
-  }
+  },
+
 }

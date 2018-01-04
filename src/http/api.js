@@ -156,9 +156,19 @@ export const getOrderDetailsById = orderId => {
  * @returns {AxiosPromise<any>}
  */
 export const getUserOrderDetails = orderId => {
-  return http.get(`user/orders/${orderId}`)
+  return http.get(`/user/orders/${orderId}`)
 }
 
-export const loadMyOrders = () => {
+export const loadMyOrders = (pageNum=1) => {
+  return http.get(`/user/orders?pageNum=${pageNum}`)
+}
 
+/**
+ * 更新订单分享图片
+ * @param orderId
+ * @param shareImage
+ * @returns {AxiosPromise<any>}
+ */
+export const updateOrderShareImage = (orderId, shareImage) => {
+  return http.put(`/user/orders/${orderId}/share_image`, { shareImage })
 }

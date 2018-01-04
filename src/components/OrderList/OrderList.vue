@@ -32,8 +32,10 @@
     </div>
 </template>
 <script>
-    import isEmpty from 'is-empty'
-	import {mapActions} from 'vuex'
+  import * as api from '../../http/api'
+  import * as types from '../../sotre/types'
+  import isEmpty from 'is-empty'
+	import {mapActions, mapMutations, mapState} from 'vuex'
 	import {XButton, Group, Cell, CellFormPreview, XDialog, TransferDomDirective as TransferDom} from 'vux'
 	export default {
 		directives: {TransferDom},
@@ -55,13 +57,19 @@
 		},
 		// 数据加载
 		beforeRouteUpdate(to, from, next) {
-			var {status=1, pageNum=1, pageSize=1} = to.params
-			this.$store.dispatch('loadMyOrders', to.params).then( orders =>{
-				next()
-            })
+			var {pageNum=1} = to.params
+      // 获取所有订单 （出包括付款成功后所有状态的）
+      api.loadMyOrders(pageNum).then( res => {
+        next(vm => {
+          vm.myOrdersLoaded(res.data)
+        })
+      })
 		},
 		methods: {
-			...mapActions(['loadMyOrders']),
+      ...mapState(['orders']),
+			...mapMutations({
+        myOrdersLoaded: types.MY_ORDERS_LOADED
+      }),
 		}
 	}
 </script>
