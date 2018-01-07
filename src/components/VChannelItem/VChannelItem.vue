@@ -140,7 +140,7 @@
               vm.primaryBtnLoading = false
               vm.primaryBtnTxt = '已抢到'
               vm.primaryBtnType = ''
-              this.$router.replace({ name: 'consume_obtain_success', params: { orderId: order.id } })
+              vm.$router.replace({ name: 'consume_obtain_success', params: { orderId: order.id } })
             }
           }
         })
