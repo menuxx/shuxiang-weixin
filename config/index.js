@@ -6,7 +6,6 @@ const path = require('path')
 
 module.exports = {
   dev: {
-
     // Paths
     contentBase: 'static',
     assetsSubDirectory: 'static',
@@ -14,10 +13,10 @@ module.exports = {
     proxyTable: {
         '/api': {
             target: 'http://wxtest.qurenjia.com',
-            // target: 'http://192.168.33.57:8070',
+            // target: 'http://127.0.0.1:8070',
             changeOrigin: true,
             pathRewrite: {
-                // '^/api': '/'
+              // '^/api': '/'
             }
         }
     },
@@ -62,7 +61,6 @@ module.exports = {
   build: {
     // Template for index.html
     index: path.resolve(__dirname, '../dist/index.html'),
-    share1: path.resolve(__dirname, '../dist/consume_success_share.html'),
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),

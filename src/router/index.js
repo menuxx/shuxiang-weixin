@@ -120,6 +120,11 @@ router.afterEach((to) => {
 })
 
 router.beforeEach((to, from, next) => {
+
+  timeId = setTimeout(function () {
+    store.commit(types.UPDATE_LOADING_STATE, { isLoading: true })
+  }, 2000)
+
   // 如果目标页面需要等露，就执行该验证流程
   if ( to.meta.needAuth ) {
     // 微信回传的 code
@@ -200,20 +205,23 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
-router.beforeEach((to, from, next) => {
+function newPathUrl(path, query) {
+  var _qs = ''
+  if (!isEmpty(query)) {
+    _qs = `?${qs.stringify(query)}`
+  }
+  return location.href.replace(location.hash, `#${path}${_qs}`)
+}
+
+router.afterEach((to) => {
 
   try {
 
     weixin.removeWeiXinConfig()
 
-    timeId = setTimeout(function () {
-      store.commit(types.UPDATE_LOADING_STATE, { isLoading: true })
-    }, 2000)
-
     function wxInitSuccess() {
       // 量秒内不能完成跳转，就显示 loading
       console.log('weixin-jspai: init successfully')
-      next()
     }
 
     function wxInitFail(err) {
@@ -227,8 +235,8 @@ router.beforeEach((to, from, next) => {
     if ( !isEmpty(wxConfig) ) {
       weixin.initConfig(Vue.wechat, wxConfig).then(wxInitSuccess, wxInitFail)
     } else {
-      console.log('weixin-jspai => url:' + location.href)
-      weixin.getWeiXinConfigSync(Vue.wechat, location.href).then(wxInitSuccess, wxInitFail)
+      console.log('weixin-jspai => url:' + newPathUrl(to.fullPath, to.query))
+      weixin.getWeiXinConfigSync(Vue.wechat, newPathUrl(to.fullPath, to.query)).then(wxInitSuccess, wxInitFail)
     }
   } catch (e) {
     console.error(e)

@@ -27,7 +27,9 @@
       align-self: flex-start;
       flex-basis: 3.5rem;
       .sx-btn-apply {
-
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
   }

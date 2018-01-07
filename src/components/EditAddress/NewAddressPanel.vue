@@ -26,7 +26,7 @@
 
 </style>
 <script>
-  import isEmpty from 'is-empty'
+import isEmpty from 'is-empty'
 import { Box, Flexbox, FlexboxItem, Group, Grid, GridItem, Cell, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data, Value2nameFilter as value2name } from 'vux'
 export default {
   components: { Box, Flexbox, FlexboxItem, Group, Grid, GridItem, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data },
@@ -39,7 +39,7 @@ export default {
       addressId: null,
       phoneNumber: '',
       receiverName: '',
-      addressAreas: [],
+      addressAreas: ['北京市', '市辖区', '东城区'],
 
       country: '',
       province: '',
@@ -49,7 +49,7 @@ export default {
 
 
       addressData: ChinaAddressV4Data,
-      addressValue: ['广东省', '深圳市', '南山区']
+      addressValue: ['北京市', '市辖区', '东城区']
     }
   },
   watch: {

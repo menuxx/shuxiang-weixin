@@ -28,6 +28,8 @@ export default {
   },
 	[types.CHANNEL_ITEM_LOADED] (state, channel) {
     // 计数器数量
+    state.channelItem.payFee = channel.payFee
+    state.channelItem.expressFee = channel.expressFee
     state.channelItem.ownerName = channel.ownerName
     state.channelItem.ownerAvatar = channel.ownerAvatar
     state.channelItem.giftTxt = channel.giftTxt
@@ -59,7 +61,13 @@ export default {
     state.channelOrder.receiver = receiverAddr
   },
   [types.MY_ORDERS_LOADED] (state, orders) {
-    state.orders = orders
+    state.orders = orders.map( order => {
+      order.items = order.items.map( item => {
+        item.itemThumbImageUrl = cdnFullUrl(item.itemThumbImage, QiNiuImagePrefix.item)
+        return item
+      })
+      return order
+    })
   },
   // 地址更新
   [types.MY_ADDRESS_UPDATED] (state, updatedAddr) {

@@ -1,15 +1,15 @@
 <template>
   <div class="sx-container">
-    
+
     <div class="sx-top-bar">
       <div class="lp">
         <span class="sx-close">x</span>
         <img class="logo-sm" src="../../assets/logo.png">
-        <span class="brand-title">书享</span>
+        <span class="brand-title">雪人读书</span>
       </div>
-      <a @click="onSubscribeUs" class="btn-subscribe-us">立即关注</a>
+      <a @click="onSubscribeUs" class="btn-subscribe-us">关注查看抢书状态</a>
     </div>
-    
+
     <div class="book-list-1" v-for="i in [1,2,3,4]" :key="i">
       <div class="book-item">
         <div class="col1">
@@ -28,9 +28,13 @@
 
     <div v-transfer-dom>
       <x-dialog :hide-on-blur="true" v-model="showSubscribeUsDialog" class="us-info">
+        <div class="sx-dialog-header-bar">
+          <span class="dialog-close" @click="showSubscribeUsDialog = false"></span>
+        </div>
         <div class="us-info-wrap">
-          <img class="qrcode" src="https://file.menuxx.com/qrcode_for_gh_6d162095948d_258.jpg" />
-          <span>长按扫码关注</span>
+          <img class="qrcode" src="https://file.menuxx.com/images/qrcode_for_gh_485aedb4e817_344.jpg" />
+          <span class="us-info-name">雪人读书</span>
+          <span class="us-info-slogan">一群人解读一本好书</span>
         </div>
       </x-dialog>
     </div>
@@ -38,7 +42,7 @@
   </div>
 </template>
 <script>
-import { XDialog, TransferDomDirective as TransferDom } from 'vux'
+import { XDialog, Cell, TransferDomDirective as TransferDom } from 'vux'
 export default {
   directives: {
     TransferDom
@@ -60,17 +64,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import '../../styles/book-list1';
+@import "../../styles/xr-top-bar";
 @import './HomePage';
-.us-info {
-  .us-info-wrap {
-    width: 100%;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
-    .qrcode {
-      display: block;
-    }
-  }
-}
+@import '../../styles/qrcode-usinfo';
 </style>

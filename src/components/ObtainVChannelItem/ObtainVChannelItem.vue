@@ -28,7 +28,8 @@
               </div>
               <div class="p2">
                 <a class="sx-btn-apply" @click="onChooseMoreAddress">
-                  <i v-if="!isShowChooseMoreAddressLoading" class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <span v-if="!isShowChooseMoreAddressLoading" class="xr-arrow-right"></span>
+                  <!--<i v-if="!isShowChooseMoreAddressLoading" class="fa fa-arrow-right" aria-hidden="true"></i>-->
                   <inline-loading v-if="isShowChooseMoreAddressLoading"></inline-loading>
                 </a>
               </div>
@@ -77,6 +78,14 @@
 <style lang="scss" scoped>
 @import "../../styles/book-list1";
 
+.xr-arrow-right {
+  background: transparent url("../../assets/ic_right.png") no-repeat center;
+  background-size: contain;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
 .sx-address-item {
   border-bottom: 1px solid #d6d6d6;
   padding: 10px 0;
@@ -104,12 +113,9 @@
     .p2 {
       align-self: center;
       .sx-btn-apply {
-        display: block;
-        line-height: 2rem;
-        text-align: center;
-        color: #38f;
-        width: 2rem;
-        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
   }

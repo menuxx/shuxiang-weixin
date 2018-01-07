@@ -112,5 +112,6 @@ export const getWeiXinConfigSync = (wx, url)=> {
     return initConfig(wx, res.data.jsApiConfig)
   }, err => {
     console.log(err)
+    return err
   })
 }

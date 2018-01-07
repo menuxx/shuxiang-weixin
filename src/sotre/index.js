@@ -29,6 +29,8 @@ const state = {
 	addresses: [],
   // 抢书渠道
   channelItem: {
+    expressFee: null,
+    payFee: null,
     // 赠语
     giftTxt: null,
     // 渠道发起人头像

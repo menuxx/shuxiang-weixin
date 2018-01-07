@@ -153,6 +153,7 @@ export const getOrderDetailsById = orderId => {
 /**
  * 获取指定的用户订单
  * @param orderId
+ * @param withObtain 关于抢书信息
  * @returns {AxiosPromise<any>}
  */
 export const getUserOrderDetails = orderId => {
@@ -160,7 +161,17 @@ export const getUserOrderDetails = orderId => {
 }
 
 export const loadMyOrders = (pageNum=1) => {
-  return http.get(`/user/orders?pageNum=${pageNum}`)
+  return http.get(`/user/orders?pageNum=${pageNum}`).then( res => {
+    res.data.map( order => {
+      order.expressTime = Date.now()
+      order.items = order.items.map( item => {
+        item.itemThumbImage = "rBEQWFEuvNkIAAAAAA1iGwk9blwAABJmANSQDQADWIz534.jpg"
+        return item
+      })
+      return order
+    })
+    return res
+  })
 }
 
 /**
@@ -171,4 +182,14 @@ export const loadMyOrders = (pageNum=1) => {
  */
 export const updateOrderShareImage = (orderId, shareImage) => {
   return http.put(`/user/orders/${orderId}/share_image`, { shareImage })
+}
+
+/**
+ * @param channelId
+ * @param loopRefId
+ * @returns {AxiosPromise<any>}
+ */
+export const getLoopChannelItemState = (channelId, loopRefId) => {
+  var loopUrl = LoopChannelItemState.replace('{channelId}', channelId) + '?loopRefId=' + loopRefId
+  return http.get(loopUrl)
 }

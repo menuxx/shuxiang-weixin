@@ -5,17 +5,39 @@
       <canvas ref="canvas" class="canvas canvas-hide" width="750" height="1334"></canvas>
 
       <div v-transfer-dom>
-        <x-dialog v-model="showWithMeShareImage" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent', width: '13rem' }">
+        <x-dialog v-model="showWithMeShareImageDialog" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent', width: '13rem' }">
           <div class="share-image-wrap1">
             <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
           </div>
-          <cell @click.native="showWithMeShareImage = false" value-align="center">
+          <cell @click.native="showWithMeShareImageDialog = false" value-align="center">
             <img slot="title" width="20" style="color: #fff;" src="../../assets/close.png" />
           </cell>
         </x-dialog>
       </div>
 
-      <scroller height="-62" lock-x :scrollbar-x="false" :scrollbar-y="true" class="sx-share-section-scroll">
+      <div class="sx-top-bar" v-if="topBarShow">
+        <div class="lp">
+          <span class="sx-close" @click="topBarShow = false">x</span>
+          <img class="logo-sm" src="../../assets/logo.png">
+          <span class="brand-title">雪人读书</span>
+        </div>
+        <a @click="onSubscribeUs" class="btn-subscribe-us">关注查看抢书状态</a>
+      </div>
+
+      <div v-transfer-dom>
+        <x-dialog :hide-on-blur="true" v-model="showSubscribeUsDialog" class="us-info">
+          <div class="sx-dialog-header-bar">
+            <span class="dialog-close" @click="showSubscribeUsDialog = false"></span>
+          </div>
+          <div class="us-info-wrap">
+            <img class="qrcode" src="https://file.menuxx.com/images/qrcode_for_gh_485aedb4e817_344.jpg" />
+            <span class="us-info-name">雪人读书</span>
+            <span class="us-info-slogan">一群人解读一本好书</span>
+          </div>
+        </x-dialog>
+      </div>
+
+      <scroller height="-124" lock-x :scrollbar-x="false" :scrollbar-y="true" class="sx-share-section-scroll">
 
         <div class="sx-share-section-body">
           <div class="exchange-next-to-section">
@@ -35,15 +57,18 @@
       </scroller>
 
       <box gap="10px 10px">
-        <x-button @click.native="onShareVChannel" type="primary">分享给好友</x-button>
+        <x-button @click.native="onShareVChannel" :disabled="shareBtnDisable" :loading="shareBtnDisable" type="primary">分享给好友</x-button>
       </box>
 
     </div>
 </template>
 <style lang="scss" scoped>
+  @import "../../styles/xr-top-bar";
+  @import '../../styles/qrcode-usinfo';
 .sx-container {
   .sx-share-section-body {
-    margin-top: 30px;
+    padding-top: 10px;
+    padding-bottom: 30px;
   }
   .exchange-next-to-section {
     display: flex;
@@ -126,7 +151,7 @@ import * as auth from '../../http/auth'
 import * as api from '../../http/api'
 import isEmpty from 'is-empty'
 import {cdnFullUrl} from '../../filters'
-import {freeLoopRefId} from '../../obtainItem'
+import {freeLoopRefId, getLoopRefId} from '../../obtainItem'
 import router from '../../router'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { Scroller, Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
@@ -266,11 +291,23 @@ export default {
         return Promise.reject(err)
       } else {
         // 清除 refId
-        freeLoopRefId(order.channelId)
-        next( vm  => {
-          vm.consumeChannelOrderLoaded( res.data )
-          vm.drawShareImage( res.data )
-        })
+        var loopRefId = getLoopRefId(order.channelId)
+        if ( isEmpty(order.queueNum) ) {
+          api.getLoopChannelItemState(order.channelId, loopRefId).then( ({ data }) => {
+            freeLoopRefId(order.channelId)
+            next( vm  => {
+              // 同步最新的名次序号
+              res.data.queueNum = data.state.queueNum
+              vm.consumeChannelOrderLoaded( res.data )
+              vm.drawShareImage( res.data )
+            })
+          })
+        } else {
+          next( vm  => {
+            vm.consumeChannelOrderLoaded( res.data )
+            vm.drawShareImage( res.data )
+          })
+        }
       }
     }, err => {
       console.log(err)
@@ -283,12 +320,15 @@ export default {
   },
   data() {
     return {
+      showSubscribeUsDialog: false,
       imgSrc: null,
-      showWithMeShareImage: false
+      topBarShow: true,
+      showWithMeShareImageDialog: false,
+      shareBtnDisable: true
     }
   },
   methods: {
-      ...mapActions(['']),
+      // ...mapActions(['']),
       ...mapMutations({
         consumeChannelOrderLoaded: types.MY_CONSUME_ORDER_LOADED
       }),
@@ -316,6 +356,7 @@ export default {
           onProgress: () => {},
           onSuccess: (res) => {
             this.imgSrc = config.QiNiuBaseUrl + res.key
+            this.shareBtnDisable = false
             cb(this.imgSrc, res.key)
           },
           onError: (err) => {
@@ -343,7 +384,7 @@ export default {
             console.log(_html)
             try {
               html2canvas(document.querySelector("#__sxDOMImageContainer"), { useCORS: true }).then( canvas => {
-                canvas.toBlob( blob => { self.updateToQiniu(blob, cb) }, 'image/png', 0.8)
+                canvas.toBlob( blob => { self.updateToQiniu(blob, cb) }, 'image/jpeg', 0.8)
               }, err => {
                 console.log(err)
               })
@@ -376,7 +417,6 @@ export default {
         })
       },
       drawShareImage(orderDetail) {
-        console.log(orderDetail)
         // 如果图片已经生成功过 就不再生成
         if ( orderDetail.shareImage ) {
           this.imgSrc = cdnFullUrl(orderDetail.shareImage, config.QiNiuImagePrefix.share)
@@ -390,12 +430,15 @@ export default {
             userAvatarUrl: orderDetail.user.avatarUrl,
             ownerAvatarUrl: cdnFullUrl(orderDetail.vChannel.ownerAvatar, config.QiNiuImagePrefix.vipChannelAvatar)
           }, (url, key) => {
-            // api.updateOrderShareImage(orderDetail.id, key.replace(config.QiNiuImagePrefix.share, ''))
+            api.updateOrderShareImage(orderDetail.id, key.replace(config.QiNiuImagePrefix.share, ''))
           })
         }
       },
       onShareVChannel() {
-        this.showWithMeShareImage = true
+        this.showWithMeShareImageDialog = true
+      },
+      onSubscribeUs() {
+        this.showSubscribeUsDialog = true
       }
   }
 }

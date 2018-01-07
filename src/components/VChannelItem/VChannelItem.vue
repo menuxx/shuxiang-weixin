@@ -111,6 +111,7 @@
         next(vm => {
           var channelItem = res[0].data
           var partner = res[1].data
+          var order = res[2].data
           var title = getTitleTxt(channelItem)
           vm.updateTitle(title)
           // mutation 更新 store 中的 channelItem
@@ -130,7 +131,7 @@
              vm.primaryBtnType = ''
           } else {
             // 没有订单 id 就说明，该用户没有参与过，可以抢
-            if ( isEmpty(res[2].data.id) ) {
+            if ( isEmpty(order.id) ) {
               vm.primaryBtnDisable = false
               vm.primaryBtnTxt = title
               vm.primaryBtnType = 'primary'
@@ -139,6 +140,7 @@
               vm.primaryBtnLoading = false
               vm.primaryBtnTxt = '已抢到'
               vm.primaryBtnType = ''
+              this.$router.replace({ name: 'consume_obtain_success', params: { orderId: order.id } })
             }
           }
         })
@@ -171,6 +173,7 @@
         this.primaryBtnDisable = true
         this.primaryBtnLoading = true
         this.channelItemObtain(channelId).then( stateCode => {
+          console.log('requestObtain 2 stateCode : ' + stateCode)
           this.requestObtainResult(stateCode)
         })
       },
@@ -240,6 +243,7 @@
         this.primaryBtnDisable = true
         this.primaryBtnLoading = true
         this.channelItemObtain(this.channelId).then(stateCode => {
+          console.log('requestObtain 1 stateCode : ' + stateCode)
           this.requestObtainResult(stateCode)
         })
       }
