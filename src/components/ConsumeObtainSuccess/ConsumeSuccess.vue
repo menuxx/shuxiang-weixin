@@ -379,18 +379,11 @@ export default {
             .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
             .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
           self.$refs.renderBox.innerHTML = _html
-          setTimeout(function () {
-            console.log(_html)
-            try {
-              html2canvas(document.querySelector("#__sxDOMImageContainer"), { useCORS: true }).then( canvas => {
-                canvas.toBlob( blob => { self.updateToQiniu(blob, cb) }, 'image/jpeg', 0.8)
-              }, err => {
-                console.log(err)
-              })
-            } catch (e) {
-              console.error(e)
-            }
-          }, 0)
+          html2canvas(document.querySelector("#__sxDOMImageContainer"), { useCORS: true }).then( canvas => {
+            canvas.toBlob( blob => { self.updateToQiniu(blob, cb) }, 'image/jpeg', 0.8)
+          }, err => {
+            console.log(err)
+          })
         })
       },
       onDrawAndroid(data, cb) {
