@@ -18,11 +18,11 @@ export const phoneNumberBeautiful = function (phoneNumber) {
 	return toString(numbers, 3) + ' ' + toString(numbers, 4) + ' ' + toString(numbers, 4)
 }
 
-export const rmbFormat = function (num) {
-  return '￥' + Number(num).toFixed(2)
+export const fenRmbFormat = function (num) {
+  return '￥' + Number(num / 100).toFixed(2)
 }
 
 Vue.filter('timestampFormat', timestampFormat)
 Vue.filter('cdnFullUrl', cdnFullUrl)
-Vue.filter('rmb', rmbFormat)
+Vue.filter('fenRmb', fenRmbFormat)
 Vue.filter('phoneNumberBeautiful', phoneNumberBeautiful)

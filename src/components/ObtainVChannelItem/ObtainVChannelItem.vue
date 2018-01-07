@@ -54,7 +54,7 @@
             <div class="col2">
               <h4 class="item-name">{{ item.name }}</h4>
               <p class="item-desc-text">{{ ownerName }}赠送-限1本</p>
-              <span class="price" v-if="payAmount > 0">{{ payAmount | rmb }}</span>
+              <span class="price" v-if="payAmount > 0">{{ payAmount | fenRmb }}</span>
             </div>
           </div>
         </div>
