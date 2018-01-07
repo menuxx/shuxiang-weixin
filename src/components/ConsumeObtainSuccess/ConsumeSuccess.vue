@@ -57,7 +57,7 @@
       </scroller>
 
       <box gap="10px 10px">
-        <x-button @click.native="onShareVChannel" :disabled="shareBtnDisable" :loading="shareBtnDisable" type="primary">分享给好友</x-button>
+        <x-button @click.native="onShareVChannel" :disabled="shareBtnDisable" :show-loading="shareBtnDisable" type="primary">分享给好友</x-button>
       </box>
 
     </div>
@@ -328,7 +328,6 @@ export default {
     }
   },
   methods: {
-      // ...mapActions(['']),
       ...mapMutations({
         consumeChannelOrderLoaded: types.MY_CONSUME_ORDER_LOADED
       }),
@@ -420,6 +419,7 @@ export default {
         // 如果图片已经生成功过 就不再生成
         if ( orderDetail.shareImage ) {
           this.imgSrc = cdnFullUrl(orderDetail.shareImage, config.QiNiuImagePrefix.share)
+          this.shareBtnDisable = false
         } else {
           this.onDraw({
             queueNum: orderDetail.queueNum,
