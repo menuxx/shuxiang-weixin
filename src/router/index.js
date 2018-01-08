@@ -25,12 +25,6 @@ Vue.use(Router)
 const router = new Router({
   routes: [
     {
-      path: '/test1',
-      component: function(resolve) {
-        require(['../components/ConsumeObtainSuccess/TestImage'], resolve)
-      }
-    },
-    {
       // 首页
       path: '/',
       name: 'index',

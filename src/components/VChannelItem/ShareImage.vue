@@ -9,7 +9,7 @@
   </div>
 </template>
 <script>
-  const html = `
+const html = `
 <div class="sx__container" id="__sxDOMImageContainer">
   <style type="text/css">
     html, body {

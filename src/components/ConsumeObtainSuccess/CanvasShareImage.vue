@@ -16,12 +16,13 @@ const html = `
       padding: 0; margin: 0;
     }
     .sx__container2 {
-      width: 630px;
+      color: #000;
+      width: 650px;
       height: 1334px;
       font-size: 36px;
-      padding: 0 60px;
+      padding: 0 50px;
       display: flex;
-      flex-flow: column wrap;
+      flex-flow: column nowrap;
       justify-content: space-around;
       align-items: center;
       font-family: "Helvetica Neue",Helvetica,"Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
