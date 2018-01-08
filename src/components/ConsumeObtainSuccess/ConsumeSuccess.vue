@@ -17,7 +17,6 @@
 
       <div class="sx-top-bar" v-if="topBarShow">
         <div class="lp">
-          <span class="sx-close" @click="topBarShow = false">x</span>
           <img class="logo-sm" src="../../assets/logo.png">
           <span class="brand-title">雪人读书</span>
         </div>
@@ -155,7 +154,6 @@ import {freeLoopRefId, getLoopRefId} from '../../obtainItem'
 import router from '../../router'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { Scroller, Box, XButton, XDialog, TransferDomDirective as TransferDom, Cell } from 'vux'
-// import CanvasShareImage from './CanvasShareImage'
 import {RouteError} from '../../lib/MyError'
 import qiniuUpload from '../../lib/qiniu-upload'
 import {makeSameOriginUrl, isAndroid, isIOS} from '../../lib/util'
@@ -338,32 +336,6 @@ export default {
         })
       },
       onDraw(data, cb = ()=>{}) {
-        if ( isIOS() ) {
-          this.onDrawIOS(data, cb)
-        } else if (isAndroid()) {
-          this.onDrawAndroid(data, cb)
-        } else { // android
-          this.onDrawAndroid(data, cb)
-        }
-      },
-      updateToQiniu(blob, cb) {
-        qiniuUpload({
-          file: blob,
-          data: {
-            keyPrefix: config.QiNiuImagePrefix.share
-          },
-          onProgress: () => {},
-          onSuccess: (res) => {
-            this.imgSrc = config.QiNiuBaseUrl + res.key
-            this.shareBtnDisable = false
-            cb(this.imgSrc, res.key)
-          },
-          onError: (err) => {
-            console.log(err)
-          }
-        })
-      },
-      onDrawIOS (data, cb) {
         var self = this
         console.log('onDrawIOS', data)
         // 只有 ios 环境才执行相关依赖
@@ -386,26 +358,21 @@ export default {
           })
         })
       },
-      onDrawAndroid(data, cb) {
-        var self = this
-        console.log('onDrawAndroid')
-        // 使用 延迟加载 ，只有 android 环境才加载相关依赖
-        require.ensure([], (require) => {
-          var rasterizeHTML = require('rasterizehtml')
-          var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
-          _html = _html
-            .replace('{{ shopUrlQrcodeUrl }}', makeQrcodeDataUrl(data.shopUrl))
-            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
-            .replace('{{ ownerName }}', data.ownerName )
-            .replace('{{ queueNum }}', data.queueNum )
-            .replace('{{ userName }}', data.userName )
-            .replace('{{ userAvatarUrl }}', makeSameOriginUrl(data.userAvatarUrl) )
-            .replace('{{ ownerAvatarUrl }}', makeSameOriginUrl(data.ownerAvatarUrl) )
-          rasterizeHTML.drawHTML(_html, self.$refs.canvas).then( result => {
-            self.$refs.canvas.toBlob( blob => { self.updateToQiniu(blob, cb) }, 'image/jpeg', 0.8)
-          }, err => {
-            console.log('An error occured:', err);
-          });
+      updateToQiniu(blob, cb) {
+        qiniuUpload({
+          file: blob,
+          data: {
+            keyPrefix: config.QiNiuImagePrefix.share
+          },
+          onProgress: () => {},
+          onSuccess: (res) => {
+            this.imgSrc = config.QiNiuBaseUrl + res.key
+            this.shareBtnDisable = false
+            cb(this.imgSrc, res.key)
+          },
+          onError: (err) => {
+            console.log(err)
+          }
         })
       },
       drawShareImage(orderDetail) {

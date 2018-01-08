@@ -18,6 +18,7 @@ const html = `
       padding: 0;
     }
     .sx__container {
+      background-color: #ffffff;
       color: #000;
       font-size: 36px;
       padding: 0 50px;
@@ -41,8 +42,11 @@ const html = `
     .sx__container .channel-owner .gift-txt {
       text-align: left;
       margin: 0;
+      line-height: 65px;
+      margin-bottom: 20px;
     }
     .sx__container .channel-owner .owner-name {
+      font-size: 40px;
       text-align: right;
       margin: 0;
       font-weight: bold;
@@ -57,10 +61,10 @@ const html = `
       display: block;
       width: 200px;
       height: 200px;
-      margin-bottom: 20px;
+      margin-bottom: 5px;
     }
     .sx__container .desc-info-sm {
-      color: #b5b1b5;
+      color: #444;
       font-size: 22px;
       text-align: center;
     }
@@ -117,39 +121,12 @@ const html = `
         })
       },
       onDraw(data) {
-        if ( isIOS() ) {
-          this.onDrawIOS(data)
-        } else if (isAndroid()) {
-          this.onDrawAndroid(data)
-        } else { // android
-          this.onDrawAndroid(data)
-        }
-      },
-      updateToQiniu(blob) {
-        qiniuUpload({
-          file: blob,
-          data: {
-            keyPrefix: config.QiNiuImagePrefix.share
-          },
-          onProgress: () => {},
-          onSuccess: (res) => {
-            this.imgSrc = config.QiNiuBaseUrl + res.key
-            this.showLoading = false
-          },
-          onError: (err) => {
-            console.log(err)
-          }
-        })
-      },
-      onDrawIOS (data) {
-        console.log('onDrawIOS')
         var self = this;
-        // 只有 ios 环境才执行相关依赖
         require.ensure([], () => {
           var html2canvas = require('html2canvas')
           var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
           _html = _html
-            .replace('{{ itemCoverImageUrl }}', "/raw_1512110740.jpeg" || makeSameOriginUrl(data.itemCoverImageUrl) )
+            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
             .replace('{{ ownerName }}', data.ownerName ).replace('{{ ownerName }}', data.ownerName )
             .replace('{{ giftTxt }}', data.giftTxt )
             .replace('{{ stock }}', data.stock )
@@ -166,24 +143,20 @@ const html = `
           }
         })
       },
-      onDrawAndroid(data) {
-        console.log('onDrawAndroid')
-        var self = this;
-        // 使用 延迟加载 ，只有 android 环境才加载相关依赖
-        require.ensure([], function(require){
-          var rasterizeHTML = require('rasterizehtml')
-          var _html = html.replace(/^ {8}/gm, "").replace(/^\n/g, "").replace(/\n +$/g, "\n")
-          _html = _html
-            .replace('{{ itemCoverImageUrl }}', makeSameOriginUrl(data.itemCoverImageUrl) )
-            .replace('{{ ownerName }}', data.ownerName ).replace('{{ ownerName }}', data.ownerName )
-            .replace('{{ giftTxt }}', data.giftTxt )
-            .replace('{{ stock }}', data.stock )
-            .replace('{{ channelItemQrcodeUrl }}', makeQrcodeDataUrl(data.channelItemUrl) )
-            rasterizeHTML.drawHTML(_html, self.$refs.canvas).then( result => {
-              self.$refs.canvas.toBlob( blob => { self.updateToQiniu(blob) }, 'image/jpeg', 0.8)
-            }, err => {
-              console.log('An error occured:', err);
-            });
+      updateToQiniu(blob) {
+        qiniuUpload({
+          file: blob,
+          data: {
+            keyPrefix: config.QiNiuImagePrefix.share
+          },
+          onProgress: () => {},
+          onSuccess: (res) => {
+            this.imgSrc = config.QiNiuBaseUrl + res.key
+            this.showLoading = false
+          },
+          onError: (err) => {
+            console.log(err)
+          }
         })
       }
     }
@@ -211,6 +184,7 @@ const html = `
     }
   }
   .canvas-hide {
+    background-color: #fff;
     display: none;
   }
 </style>

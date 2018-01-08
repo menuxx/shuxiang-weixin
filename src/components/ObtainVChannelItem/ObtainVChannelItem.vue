@@ -348,6 +348,10 @@ export default {
       }
     },
     requestConsumeObtain() {
+      if (isEmpty(this.receiver) || isEmpty(this.receiver.id)) {
+        this.$vux.toast.text('请填写收货地址', 'middle')
+        return
+      }
       api.requestConsumeObtain(this.channelId, this.receiver.id).then( res => {
         var {code, orderId, wxPayment} = res.data
         switch (code) {

@@ -190,7 +190,7 @@
           // 已消费(已经抢到了)
           case States.ObtainConsumed:
           case States.ObtainConsumeAgain:
-            this.$vux.toast.show({ text: '已经抢到改书' })
+            this.$vux.toast.show({ text: '已抢到' })
             break;
           // 已经结束了
           case States.Finish:

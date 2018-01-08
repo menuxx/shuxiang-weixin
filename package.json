@@ -19,6 +19,7 @@
     "html2canvas": "^1.0.0-alpha.8",
     "is-empty": "^1.2.0",
     "is-integer": "^1.0.7",
+    "lodash.slice": "^4.2.0",
     "qrious": "^4.0.2",
     "querystring": "^0.2.0",
     "rasterizehtml": "^1.2.4",

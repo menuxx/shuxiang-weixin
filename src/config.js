@@ -27,7 +27,7 @@ module.exports = {
     SiteBaseUrl: config.Domain.SiteBaseUrl
   },
   WeiXin: {
-    mpAppId: 'wx931d9dfbd5275c6e'
+    mpAppId: 'wx3d87bb42c08a2c4b'
   },
   QiNiuBaseUrl: 'https://file.menuxx.com/',
   QiNiuImagePrefix: {

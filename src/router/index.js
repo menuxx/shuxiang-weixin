@@ -3,22 +3,15 @@ import Router from 'vue-router'
 import store from '../sotre'
 import * as types from '../sotre/types'
 import isEmpty from 'is-empty'
+import slice from 'lodash.slice'
 import qs from 'querystring'
 import * as auth from '../http/auth'
 import * as weixin from '../weixin'
 import {getSessionTokenByCode, refreshSessionToken} from '../http/api'
 import config from '../config'
 import {isProd} from '../env'
+import {isIOS} from '../lib/util'
 import {RouteError} from '../lib/MyError'
-
-// import HomePage from '@/components/HomePage/HomePage'
-// import ChannelItem from '@/components/ChannelItem/ChannelItem'
-// import ChannelItemPartnerList from '@/components/ChannelItem/PartnerList'
-// import ObtainChannelItem from '@/components/ObtainChannelItem/ObtainChannelItem'
-// import ConsumeObtainSuccess from '@/components/ConsumeObtainSuccess/ConsumeSuccess'
-// import EditAddress from '@/components/EditAddress/EditAddress'
-// import OrderList from '@/components/OrderList/OrderList'
-// import Test1 from '@/components/Test/Test'
 
 Vue.use(Router)
 
@@ -98,6 +91,34 @@ const router = new Router({
     }
   ]
 })
+
+function removePushState() {
+  localStorage.removeItem('__push_state__')
+}
+
+function getPushState() {
+  return parseInt(localStorage.getItem('__push_state__'))
+}
+
+function putPushState() {
+  localStorage.setItem('__push_state__', 1)
+}
+
+var _push = router.push.bind(router)
+
+router.push = function () {
+  putPushState()
+  console.log('[push]__push_state__', getPushState())
+  _push.apply(router, slice(arguments))
+}
+
+var _replace = router.replace.bind(router)
+
+router.replace = function () {
+  putPushState()
+  console.log('[replace]__push_state__', getPushState())
+  _replace.apply(router, slice(arguments))
+}
 
 function clearQueryWithUrl(argName, code, url) {
   return url.replace(`${argName}=${code}&`, '').replace(`${argName}=${code}`, '')
@@ -207,15 +228,23 @@ function newPathUrl(path, query) {
   return location.href.replace(location.hash, `#${path}${_qs}`)
 }
 
+function notNeedRefreshConfig() {
+  return getPushState() === 1 && isIOS()
+}
+
 router.afterEach((to) => {
 
   try {
 
-    weixin.removeWeiXinConfig()
+    // 需要刷新的时候
+    if ( !notNeedRefreshConfig() ) {
+      console.log('remove_weixin_config')
+      weixin.removeWeiXinConfig()
+    }
 
     function wxInitSuccess() {
       // 量秒内不能完成跳转，就显示 loading
-      console.log('weixin-jspai: init successfully')
+      console.log('weixin-jsapi: init successfully')
     }
 
     function wxInitFail(err) {
@@ -226,14 +255,16 @@ router.afterEach((to) => {
 
     console.log('weixin-jspai: config', wxConfig)
 
-    if ( !isEmpty(wxConfig) ) {
+    if ( !isEmpty(wxConfig) && !notNeedRefreshConfig() ) {
       weixin.initConfig(Vue.wechat, wxConfig).then(wxInitSuccess, wxInitFail)
-    } else {
+    } else if (!notNeedRefreshConfig()) {
       console.log('weixin-jspai => url:' + newPathUrl(to.fullPath, to.query))
       weixin.getWeiXinConfigSync(Vue.wechat, newPathUrl(to.fullPath, to.query)).then(wxInitSuccess, wxInitFail)
     }
   } catch (e) {
     console.error(e)
+  } finally {
+    removePushState()
   }
 })
 
