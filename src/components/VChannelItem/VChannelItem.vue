@@ -135,7 +135,7 @@
               vm.primaryBtnDisable = false
               vm.primaryBtnTxt = title
               vm.primaryBtnType = 'primary'
-            } else {
+            } else if ( !isEmpty(order.id) && !isEmpty(order.queueNum) )  {
               vm.primaryBtnDisable = true
               vm.primaryBtnLoading = false
               vm.primaryBtnTxt = '已抢到'
@@ -208,7 +208,7 @@
         return http.get(api.ObtainChannelItem.replace('{channelId}', channelId)).then( res => {
           var {errCode, loopRefId, messageId, errMsg} = res.data
           // 满足轮询状态开始轮训
-          if (errCode === 0 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
+          if (errCode === 1 && !isEmpty(loopRefId) && !isEmpty(messageId)) {
             setLoopRefId(channelId, loopRefId)
             return debounceLoopChannelState(channelId, loopRefId, (stateCode, next) => {
               console.log('loop stateCode: ', stateCode)
