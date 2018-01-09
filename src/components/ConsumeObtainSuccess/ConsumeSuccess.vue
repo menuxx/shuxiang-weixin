@@ -41,7 +41,7 @@
         <div class="sx-share-section-body">
           <div class="exchange-next-to-section">
             <img class="channel-image avatar" :src="myConsumeChannelOrderDetails.vChannel.ownerAvatarUrl">
-            <img class="exchange-icon" src="../../assets/ic_giftbook.png" />
+            <img class="exchange-icon" src="../../assets/ic_giftbook-box.png" />
             <img class="obtain-user avatar" :src="myConsumeChannelOrderDetails.user.avatarUrl">
           </div>
           <p class="slogan-text">{{ myConsumeChannelOrderDetails.user.userName }}成功领取{{ myConsumeChannelOrderDetails.vChannel.ownerName }}送出的新书</p>
@@ -254,7 +254,7 @@ const html = `
 
   <div class="avatar-next-to-section">
     <img class="channel-image avatar" src="{{ ownerAvatarUrl }}">
-    <img class="sx-exchange-icon" src="/ic_giftbook.png">
+    <img class="sx-exchange-icon" src="/ic_giftbook-box.png">
     <img class="obtain-user avatar" src="{{ userAvatarUrl }}">
   </div>
 
