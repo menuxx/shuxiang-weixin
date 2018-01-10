@@ -1,21 +1,39 @@
 
 const isProd = require('./env').isProd
+const isTest = require('./env').isTest
+const isDev = require('./env').isDev
 
 var config = {}
 
-if (isProd()) {
+if ( isProd() ) {
   config = {
     Domain: {
-      APIBaseUrl: 'http://wxtest.qurenjia.com/api',
-      SiteBaseUrl: 'http://wxtest.qurenjia.com'
+      APIBaseUrl: 'https://wx.nizhuantech.com/api',
+      SiteBaseUrl: 'https://wx.nizhuantech.com'
+    }
+  }
+} else if ( isDev() ) {
+  config = {
+    Domain: {
+      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_test",
+      APIBaseUrl: "http://wxtest.qurenjia.com/api",
+      SiteBaseUrl: "http://wxtest.qurenjia.com"
+    }
+  }
+} else if ( isTest() ) {
+  config = {
+    Domain: {
+      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_dev",
+      APIBaseUrl: "http://wxdev.qurenjia.com/api",
+      SiteBaseUrl: "http://wxdev.qurenjia.com"
     }
   }
 } else {
   config = {
     Domain: {
-      AuthEntryPointUrl: "http://wxtest.qurenjia.com/wxauthcodetestredirect_2017",
-      APIBaseUrl: "http://wxdev.qurenjia.com/api",
-      SiteBaseUrl: "http://wxdev.qurenjia.com"
+      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_test",
+      APIBaseUrl: "http://wxtest.qurenjia.com/api",
+      SiteBaseUrl: "http://wxtest.qurenjia.com"
     }
   }
 }
