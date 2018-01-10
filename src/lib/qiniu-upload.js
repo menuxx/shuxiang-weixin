@@ -87,6 +87,15 @@ function getUpToken () {
  * https://developer.qiniu.com/kodo/api/1312/upload
  * @param request
  */
+
+ function getEnvHttpOrHttps() {
+   if( /https:/.test(location.protocol) ) {
+     return 'https'
+   } else {
+     return 'http'
+   }
+ }
+
 export default function (option) {
   var form = new FormData()
   return getUpToken().then(function (token) {
@@ -98,7 +107,7 @@ export default function (option) {
     form.append("token", token.uptoken)
     form.append("file", option.file)
     form.append("accept", "application/json")
-    return post('http://up.qiniu.com', form, function onProgress(e) {
+    return post(getEnvHttpOrHttps() + '://up.qiniu.com', form, function onProgress(e) {
       if (e.total > 0) {
         e.percent = e.loaded / e.total * 100;
       }
