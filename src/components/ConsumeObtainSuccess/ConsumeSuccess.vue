@@ -128,10 +128,10 @@
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
+  padding: 10px;
   .top-alert-text {
     font-size: 0.6rem;
     color: #343034;
-    margin-bottom: 15px;
   }
   .image {
     display: block;
