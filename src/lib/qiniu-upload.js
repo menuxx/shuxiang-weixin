@@ -107,7 +107,7 @@ export default function (option) {
     form.append("token", token.uptoken)
     form.append("file", option.file)
     form.append("accept", "application/json")
-    return post(getEnvHttpOrHttps() + '://up.qiniu.com', form, function onProgress(e) {
+    return post(getEnvHttpOrHttps() + '://upload.qiniup.com', form, function onProgress(e) {
       if (e.total > 0) {
         e.percent = e.loaded / e.total * 100;
       }
