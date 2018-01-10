@@ -248,7 +248,9 @@ router.afterEach((to) => {
     }
 
     function wxInitFail(err) {
-      alert('出错了，微信初始化失败:' + err.message)
+      if (!isProd()) {
+        alert('出错了，微信初始化失败:' + err.message)
+      }
     }
 
     var wxConfig = weixin.getWeiXinConfig()

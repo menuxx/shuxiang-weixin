@@ -7,6 +7,7 @@
       <div v-transfer-dom>
         <x-dialog v-model="showWithMeShareImageDialog" :hide-on-blur="true" :dialog-style="{ backgroundColor: 'transparent', width: '13rem' }">
           <div class="share-image-wrap1">
+            <div class="top-alert-text">长按保存相册分享到朋友圈</div>
             <img @click="onImageClick" ref="image" class="image" :src="imgSrc" />
           </div>
           <cell @click.native="showWithMeShareImageDialog = false" value-align="center">
@@ -127,9 +128,14 @@
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
+  .top-alert-text {
+    font-size: 0.6rem;
+    color: #343034;
+    margin-bottom: 15px;
+  }
   .image {
     display: block;
-    width: 100%;
+    width: 95%;
   }
 }
 .render-box {
