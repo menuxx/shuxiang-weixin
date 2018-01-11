@@ -84,6 +84,7 @@ export default {
 @import '../../styles/qrcode-usinfo';
   .book-list-1 .col2 {
     margin-right: 10px;
+    flex: 1;
   }
   .book-list-1 .col3 {
     display: flex;

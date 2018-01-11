@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
         '/api': {
-            // target: 'http://wxtest.qurenjia.com',
+            // target: 'http://wx.nizhuantech.com',
             target: 'http://192.168.33.57:8070',
             changeOrigin: true,
             pathRewrite: {
