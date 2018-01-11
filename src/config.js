@@ -15,17 +15,17 @@ if ( isProd() ) {
 } else if ( isDev() ) {
   config = {
     Domain: {
-      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_test",
-      APIBaseUrl: "http://wxtest.qurenjia.com/api",
-      SiteBaseUrl: "http://wxtest.qurenjia.com"
+      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_dev",
+      APIBaseUrl: "http://wxdev.qurenjia.com/api",
+      SiteBaseUrl: "http://wxdev.qurenjia.com"
     }
   }
 } else if ( isTest() ) {
   config = {
     Domain: {
-      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_dev",
-      APIBaseUrl: "http://wxdev.qurenjia.com/api",
-      SiteBaseUrl: "http://wxdev.qurenjia.com"
+      AuthEntryPointUrl: "https://wx.nizhuantech.com/wxauthcoderedirect_test",
+      APIBaseUrl: "http://wxtest.qurenjia.com/api",
+      SiteBaseUrl: "http://wxtest.qurenjia.com"
     }
   }
 } else {
@@ -50,6 +50,7 @@ module.exports = {
   QiNiuBaseUrl: 'https://file.menuxx.com/',
   QiNiuImagePrefix: {
     item: 'images/items/',
+    book: 'images/books/',
     vipChannelAvatar: 'images/channel/avatar/',
     share: 'images/share/'
   }

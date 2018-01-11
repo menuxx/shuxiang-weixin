@@ -13,7 +13,7 @@ module.exports = {
     proxyTable: {
         '/api': {
             // target: 'http://wxtest.qurenjia.com',
-            target: 'http://127.0.0.1:8070',
+            target: 'http://192.168.33.57:8070',
             changeOrigin: true,
             pathRewrite: {
               '^/api': '/'

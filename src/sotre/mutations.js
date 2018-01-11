@@ -107,5 +107,13 @@ export default {
    */
   [types.MY_CONSUME_ORDER_LOADED] (state, orderDetails) {
     state.consumeChannelOrderDetails = orderDetails
+  },
+  [types.BOOKS_LOADED] (state, books) {
+    state.books = books.map( b => {
+      b.thumbImgUrl = cdnFullUrl(b.thumbImgs, QiNiuImagePrefix.book)
+      b.coverImageUrl = cdnFullUrl(b.coverImage, QiNiuImagePrefix.book)
+      return b
+    })
+    console.log(state.books)
   }
 }

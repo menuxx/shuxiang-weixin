@@ -193,3 +193,7 @@ export const getLoopChannelItemState = (channelId, loopRefId) => {
   var loopUrl = LoopChannelItemState.replace('{channelId}', channelId) + '?loopRefId=' + loopRefId
   return http.get(loopUrl)
 }
+
+export const getSysBooks = ()=> {
+  return http.get('/books')
+}

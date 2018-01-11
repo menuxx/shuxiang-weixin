@@ -5,6 +5,8 @@ export const USER_AUTH_TOKEN_UPDATE = 'user_auth_token_update'
 
 export const MY_ADDRESS_ADDED = 'my_address_added'
 
+export const BOOKS_LOADED = 'books_loaded'
+
 export const MY_ORDERS_LOADED = 'my_orders_loaded'
 
 export const MY_CONSUME_ORDER_LOADED = 'my_order_loaded'

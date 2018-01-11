@@ -9,19 +9,18 @@
       </div>
       <a @click="onSubscribeUs" class="btn-subscribe-us">关注查看抢书状态</a>
     </div>
-
-    <div class="book-list-1" v-for="i in [1,2,3,4]" :key="i">
-      <div class="book-item">
+    <div class="book-list-1">
+      <div class="book-item" v-for="book in books" :key="book.id">
         <div class="col1">
-          <img class="item-thumb" src="https://pro.modao.cc/uploads3/images/1494/14947625/raw_1512110740.jpeg">
+          <img class="item-thumb" :src="book.coverImageUrl">
         </div>
         <div class="col2">
-          <h4 class="item-name">《见识》 珍藏版</h4>
-          <p class="item-desc-text">个人的成就首先取决于“见识”</p>
-          <span class="price">￥65.00</span>
+          <h4 class="item-name">{{ book.name }}</h4>
+          <p class="item-desc-text">{{ book.describe }}</p>
+          <span class="price">{{ book.price | fenRmb }}</span>
         </div>
         <div class="col3">
-          <a class="xs-btn-buy">购买</a>
+          <a class="xs-btn-buy" :href="book.shopUrl">购买</a>
         </div>
       </div>
     </div>
@@ -43,6 +42,9 @@
 </template>
 <script>
 import { XDialog, Cell, TransferDomDirective as TransferDom } from 'vux'
+import * as api from '../../http/api'
+import {mapMutations, mapState} from 'vuex'
+import * as types from '../../sotre/types'
 export default {
   directives: {
     TransferDom
@@ -50,12 +52,25 @@ export default {
   components: {
     XDialog
   },
+  beforeRouteEnter(to, from, next) {
+    api.getSysBooks().then( res => {
+      next(vm => {
+        vm.booksLoaded( res.data )
+      })
+    })
+  },
   data() {
     return {
       showSubscribeUsDialog: false
     }
   },
+  computed: {
+    ...mapState(['books'])
+  },
   methods: {
+    ...mapMutations({
+      booksLoaded: types.BOOKS_LOADED
+    }),
     onSubscribeUs() {
       this.showSubscribeUsDialog = true
     }
@@ -67,4 +82,17 @@ export default {
 @import "../../styles/xr-top-bar";
 @import './HomePage';
 @import '../../styles/qrcode-usinfo';
+  .book-list-1 .col2 {
+    margin-right: 10px;
+  }
+  .book-list-1 .col3 {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    .xs-btn-buy {
+      width: 1.6rem;
+      align-self: center;
+    }
+  }
 </style>

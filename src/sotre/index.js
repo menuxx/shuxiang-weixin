@@ -25,6 +25,7 @@ const state = {
     token: null,
     userInfo: null
   },
+  books: [],
 	// 地址列表
 	addresses: [],
   // 抢书渠道
