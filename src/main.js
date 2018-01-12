@@ -7,15 +7,16 @@ import router from './router'
 import store from './sotre'
 import http from './http'
 import './lib/type'
+import {isProd} from './env'
 
 console.log('process.env.NODE_ENV: ' + process.env.NODE_ENV)
 
-  // if (process.env.NODE_ENV === 'development') {
+  if (!isProd()) {
     require.ensure([], function (require) {
       var VConsole = require('vconsole')
       new VConsole()
     })
-  // }
+  }
 
 import 'font-awesome-webpack'
 
