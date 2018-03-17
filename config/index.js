@@ -6,23 +6,24 @@ const path = require('path')
 
 module.exports = {
   dev: {
-
     // Paths
+    contentBase: 'static',
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
         '/api': {
-            target: 'http://192.168.199.121:8070/',
+            // target: 'http://wx.nizhuantech.com',
+            target: 'http://192.168.33.57:8070',
             changeOrigin: true,
             pathRewrite: {
-                '^/api': '/'
+              '^/api': '/'
             }
         }
     },
 
     // Various Dev Server settings
-    host: '192.168.199.121', // can be overwritten by process.env.HOST
-    port: 8082, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    host: '127.0.0.1', // can be overwritten by process.env.HOST
+    port: 8083, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,

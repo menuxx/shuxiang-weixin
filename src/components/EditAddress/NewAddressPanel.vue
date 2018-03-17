@@ -16,36 +16,40 @@
 
     <x-textarea :required="true" :max="30" v-model="detailInfo" placeholder="详细位置"></x-textarea>
 
-    <x-button @click.native="onSubmit" type="primary" :disabled="saveBtnDisable">确认</x-button>
+    <box gap="10px 10px">
+      <x-button @click.native="onSubmit" type="primary" :disabled="saveBtnDisable">确认</x-button>
+    </box>
+
   </group>
 </template>
 <style lang="scss">
 
 </style>
 <script>
-  import isEmpty from 'is-empty'
-import { Flexbox, FlexboxItem, Group, Grid, GridItem, Cell, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data, Value2nameFilter as value2name } from 'vux'
+import isEmpty from 'is-empty'
+import { Box, Flexbox, FlexboxItem, Group, Grid, GridItem, Cell, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data, Value2nameFilter as value2name } from 'vux'
 export default {
-  components: { Flexbox, FlexboxItem, Group, Grid, GridItem, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data },
+  components: { Box, Flexbox, FlexboxItem, Group, Grid, GridItem, XInput, XTextarea, XButton, XAddress, ChinaAddressV4Data },
   data() {
+
     return {
 
       saveBtnDisable: true,
 
+      addressId: null,
       phoneNumber: '',
       receiverName: '',
-      addressAreas: [],
+      addressAreas: ['北京市', '市辖区', '东城区'],
 
       country: '',
       province: '',
       city: '',
       postalCode: '',
-
       detailInfo: '',
 
 
       addressData: ChinaAddressV4Data,
-      addressValue: ['广东省', '深圳市', '南山区']
+      addressValue: ['北京市', '市辖区', '东城区']
     }
   },
   watch: {
@@ -75,16 +79,47 @@ export default {
       this.country = areas[2]
       this.postalCode = this.addressAreas[2]
     },
+    setAddressData(address) {
+      if (address) {
+        this.addressId = address.id
+        this.receiverName = address.receiverName
+        this.phoneNumber = address.phoneNumber
+        this.postalCode = address.postalCode
+        this.detailInfo = address.detailInfo
+        this.province = address.province
+        this.city = address.city
+        this.country = address.country
+        this.addressAreas = [address.province, address.city, address.country]
+      } else {
+        this.addressId = null
+        this.receiverName = ''
+        this.phoneNumber = ''
+        this.postalCode = ''
+        this.detailInfo = ''
+        this.province = ''
+        this.city = ''
+        this.country = ''
+        this.addressAreas = []
+      }
+    },
     // 确认提交
     onSubmit() {
+      var type = 0
+      if (!isEmpty(this.addressId) ) {
+        type = 1
+      }
       this.$emit('submit', {
-        phoneNumber: this.phoneNumber,
-        receiverName: this.receiverName,
-        country: this.country,
-        province: this.province,
-        city: this.city,
-        postalCode: this.postalCode,
-        detailInfo: this.detailInfo
+        address: {
+          id: this.addressId,
+          phoneNumber: this.phoneNumber,
+          receiverName: this.receiverName,
+          country: this.country,
+          province: this.province,
+          city: this.city,
+          postalCode: this.postalCode,
+          detailInfo: this.detailInfo
+        },
+        type: type
       })
     }
   }

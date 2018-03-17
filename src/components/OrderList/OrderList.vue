@@ -1,30 +1,33 @@
 <template>
     <div class="sx-container">
-
         <div class="order-list-1">
-            <div class="order-item" v-for="order in orders" :key="i">
-                <div class="col1">
-                    <img class="item-thumb" :src="order.item.thumbImg">
-                </div>
-                <div class="col2">
-                    <h4 class="item-name">{{ order.itemName }}</h4>
-                    <p class="item-desc-text">2017-11-30 19:32 领取</p>
-                </div>
-                <div class="col3">
+            <div class="order-item" v-for="order in orders" :key="order.id">
+              <div class="item-list">
+                <div class="order-item" v-for="item in order.items" :key="item.id">
+                  <div class="col1">
+                    <img class="item-thumb" :src="item.itemThumbImageUrl">
+                  </div>
+                  <div class="col2">
+                    <h4 class="item-name">{{ item.itemName }}</h4>
+                    <p class="item-desc-text">{{ order.createAt }} 领取</p>
+                  </div>
+                  <div class="col3" @click="showDetailInfo(order)">
                     <a class="xs-btn-status"
-                       :class="{ 'xs-btn-status-no-send': i % 2 === 0, 'xs-btn-status-send': i % 2 === 1 }">未发货</a>
+                       :class="{ 'xs-btn-status-no-send': order.status === 2, 'xs-btn-status-send': order.status === 3 }">未发货</a>
                     <i class="fa fa-angle-right" aria-hidden="true"></i>
+                  </div>
                 </div>
+              </div>
             </div>
         </div>
-        <div v-if="true" class="empty-list">
+        <div v-if="orders.length < 1" class="empty-list">
             <i class="fa fa-sticky-note-o" aria-hidden="true"></i> 还什么都没有
         </div>
         <div v-transfer-dom>
-            <x-dialog v-model="showItemExpress" hide-on-blur="false">
+            <x-dialog v-model="showItemExpressDialog" :hide-on-blur="false">
                 <group>
                     <cell title="快递信息"></cell>
-                    <cell-form-preview :list="list"></cell-form-preview>
+                    <cell-form-preview :list="detailList"></cell-form-preview>
                     <x-button type="primary" disabled>查看详细</x-button>
                 </group>
             </x-dialog>
@@ -32,36 +35,62 @@
     </div>
 </template>
 <script>
-    import isEmpty from 'is-empty'
-	import {mapActions} from 'vuex'
+  import * as api from '../../http/api'
+  import * as types from '../../sotre/types'
+  import * as date from '../../lib/date'
+  import isEmpty from 'is-empty'
+	import {mapActions, mapMutations, mapState} from 'vuex'
 	import {XButton, Group, Cell, CellFormPreview, XDialog, TransferDomDirective as TransferDom} from 'vux'
 	export default {
 		directives: {TransferDom},
 		components: {XButton, Group, Cell, CellFormPreview, XDialog},
 		data() {
 			return {
-				showItemExpress: true,
-				list: [{
-					label: '物流',
-					value: '顺丰快递'
-				}, {
-					label: '发货日期',
-					value: '2017-12-12 14:20:21'
-				}, {
-					label: '运单号',
-					value: 'j3812989239012097425'
-				}]
+				showItemExpressDialog: false,
+        detailList: []
 			}
 		},
 		// 数据加载
-		beforeRouteUpdate(to, from, next) {
-			var {status=1, pageNum=1, pageSize=1} = to.params
-			this.$store.dispatch('loadMyOrders', to.params).then( orders =>{
-				next()
-            })
+		beforeRouteEnter(to, from, next) {
+			var {pageNum=1} = to.query
+      // 获取所有订单 （出包括付款成功后所有状态的）
+      api.loadMyOrders(pageNum).then( res => {
+        next(vm => {
+          vm.myOrdersLoaded(res.data)
+        })
+      })
 		},
+    computed: {
+      ...mapState({
+        orders : state => state.orders
+      }),
+    },
 		methods: {
-			...mapActions(['loadMyOrders']),
+			...mapMutations({
+        myOrdersLoaded: types.MY_ORDERS_LOADED
+      }),
+      showDetailInfo(order) {
+			  if ( order.status <= 2 ) {
+			    this.$vux.toast.show({
+            text: '还没有发货',
+            type: 'text'
+          })
+        } else if (order.status >= 3) {
+          this.detailInfo = [
+            {
+             label: '物流',
+             value: order.expressName
+            }, {
+             label: '发货日期',
+             value: date.formatDateTime(new Date(order.expressTime))
+            }, {
+             label: '运单号',
+             value: order.expressNo
+            }
+          ]
+          this.showItemExpressDialog = true
+        }
+      }
 		}
 	}
 </script>

@@ -17,12 +17,19 @@ export const buildAuthAuthorizeUrl = (appId, redirectUrl) => {
   return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`
 }
 
+/**
+ * 获取用户信息
+ */
 export const getUserInfo = () => {
   if ( !isEmpty(getMyAuthToken()) ) {
-    return localStorage[USERINFO_STORAGE_KEY].data
+    return JSON.parse(localStorage.getItem(USERINFO_STORAGE_KEY)).data
   }
 }
 
+/**
+ * 设置用户信息
+ * @param user
+ */
 export const setUserInfo = (user) => {
   var data = { meta: { createAt: Date.now() }, data: user }
   return localStorage.setItem(USERINFO_STORAGE_KEY, JSON.stringify(data))
@@ -43,6 +50,11 @@ export const myAuthTokenExpired = () => {
   return Date.now() - data.meta.createAt > 7200 * 1000
 }
 
+/**
+ * 获取 authtoken
+ * 过期了也能获取到
+ * @returns {*}
+ */
 export const getMyExpiredToken = () => {
   var dataJson = localStorage.getItem(AUTHTOKEN_STORAGE_KEY)
   var data = JSON.parse(dataJson)
@@ -52,7 +64,7 @@ export const getMyExpiredToken = () => {
 
 /**
  * 获取我的认证令牌
- * 7200 秒后果器
+ * 7200 秒后过期获取不到
  */
 export const getMyAuthToken = () => {
     var dataJson = localStorage.getItem(AUTHTOKEN_STORAGE_KEY)
@@ -61,7 +73,7 @@ export const getMyAuthToken = () => {
     if ( isEmpty(data) ) { return null }
     if ( isEmpty(data.meta) ) { return null }
     if ( Date.now() - data.meta.createAt > 7200 * 1000  ) {
-      delete localStorage.removeItem(AUTHTOKEN_STORAGE_KEY)
+      localStorage.removeItem(AUTHTOKEN_STORAGE_KEY)
       return null
     } else {
       return data.data

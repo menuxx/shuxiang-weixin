@@ -1,36 +1,39 @@
 <template>
   <div class="sx-container">
-    
+
     <div class="sx-top-bar">
       <div class="lp">
         <span class="sx-close">x</span>
         <img class="logo-sm" src="../../assets/logo.png">
-        <span class="brand-title">书享</span>
+        <span class="brand-title">雪人读书</span>
       </div>
-      <a @click="onSubscribeUs" class="btn-subscribe-us">立即关注</a>
+      <a @click="onSubscribeUs" class="btn-subscribe-us">关注查看抢书状态</a>
     </div>
-    
-    <div class="book-list-1" v-for="i in [1,2,3,4]" :key="i">
-      <div class="book-item">
+    <div class="book-list-1">
+      <div class="book-item" v-for="book in books" :key="book.id">
         <div class="col1">
-          <img class="item-thumb" src="https://pro.modao.cc/uploads3/images/1494/14947625/raw_1512110740.jpeg">
+          <img class="item-thumb" :src="book.coverImageUrl">
         </div>
         <div class="col2">
-          <h4 class="item-name">《见识》 珍藏版</h4>
-          <p class="item-desc-text">个人的成就首先取决于“见识”</p>
-          <span class="price">￥65.00</span>
+          <h4 class="item-name">{{ book.name }}</h4>
+          <p class="item-desc-text">{{ book.describe }}</p>
+          <span class="price">{{ book.price | fenRmb }}</span>
         </div>
         <div class="col3">
-          <a class="xs-btn-buy">购买</a>
+          <a class="xs-btn-buy" :href="book.shopUrl">购买</a>
         </div>
       </div>
     </div>
 
     <div v-transfer-dom>
       <x-dialog :hide-on-blur="true" v-model="showSubscribeUsDialog" class="us-info">
+        <div class="sx-dialog-header-bar">
+          <span class="dialog-close" @click="showSubscribeUsDialog = false"></span>
+        </div>
         <div class="us-info-wrap">
-          <img class="qrcode" src="https://file.menuxx.com/qrcode_for_gh_6d162095948d_258.jpg" />
-          <span>长按扫码关注</span>
+          <img class="qrcode" src="https://file.menuxx.com/images/qrcode_for_gh_485aedb4e817_344.jpg" />
+          <span class="us-info-name">雪人读书</span>
+          <span class="us-info-slogan">一群人解读一本好书</span>
         </div>
       </x-dialog>
     </div>
@@ -38,7 +41,10 @@
   </div>
 </template>
 <script>
-import { XDialog, TransferDomDirective as TransferDom } from 'vux'
+import { XDialog, Cell, TransferDomDirective as TransferDom } from 'vux'
+import * as api from '../../http/api'
+import {mapMutations, mapState} from 'vuex'
+import * as types from '../../sotre/types'
 export default {
   directives: {
     TransferDom
@@ -46,12 +52,25 @@ export default {
   components: {
     XDialog
   },
+  beforeRouteEnter(to, from, next) {
+    api.getSysBooks().then( res => {
+      next(vm => {
+        vm.booksLoaded( res.data )
+      })
+    })
+  },
   data() {
     return {
       showSubscribeUsDialog: false
     }
   },
+  computed: {
+    ...mapState(['books'])
+  },
   methods: {
+    ...mapMutations({
+      booksLoaded: types.BOOKS_LOADED
+    }),
     onSubscribeUs() {
       this.showSubscribeUsDialog = true
     }
@@ -60,17 +79,21 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import '../../styles/book-list1';
+@import "../../styles/xr-top-bar";
 @import './HomePage';
-.us-info {
-  .us-info-wrap {
-    width: 100%;
+@import '../../styles/qrcode-usinfo';
+  .book-list-1 .col2 {
+    margin-right: 10px;
+    flex: 1;
+  }
+  .book-list-1 .col3 {
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
-    .qrcode {
-      display: block;
+    .xs-btn-buy {
+      width: 1.6rem;
+      align-self: center;
     }
   }
-}
 </style>

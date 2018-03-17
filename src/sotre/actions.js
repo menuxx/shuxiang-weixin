@@ -21,34 +21,40 @@ export default {
 	/**
 	 * 获取我的 primary 地址
 	 */
-	getPrimaryAddress({commit}) {
-		return api.getMyPrimaryAddress().then( address => {
-			commit(types.MY_PRIMARY_ADDRESS_LOADED, address)
-			return address
-		})
-	},
+	// getPrimaryAddress({commit}) {
+	// 	return api.getMyPrimaryAddress().then( address => {
+	// 		commit(types.MY_PRIMARY_ADDRESS_LOADED, address)
+	// 		return address
+	// 	})
+	// },
 
 	/**
 	 * 获取我的地址列表
 	 */
-	loadMyAddress({commit}) {
-		return api.getMyAddresses().then( addresses => {
-			commit(types.MY_ADDRESSES_LOADED, addresses)
-			return addresses
-		})
-	},
+	// loadMyAddresses({commit}) {
+	// 	return api.getMyAddresses().then( addresses => {
+	// 		commit(types.MY_ADDRESSES_LOADED, addresses)
+	// 		return addresses
+	// 	})
+	// },
+
+  /**
+   * 添加一个地址
+   */
+  addNewAddress({commit}, address) {
+    return api.addNewAddress(address).then( res => {
+      commit(types.MY_ADDRESS_ADDED, res.data)
+      return res.data
+    })
+  },
 
 	/**
 	 * 更新我的地址
 	 */
 	updateAddress({commit}, address) {
-		return api.updateAddress(address.id, address).then( isOk => {
-			if ( isOk.code === api.ApiSuccess ) {
-				commit(types.MY_ADDRESS_UPDATED_OK, address)
-			} else {
-				commit(types.MY_ADDRESS_UPDATED_FAIL, address)
-			}
-			return isOk
+		return api.updateMyAddress(address.id, address).then( res => {
+      commit(types.MY_ADDRESS_UPDATED, address)
+			return res.data
 		})
 	},
 
@@ -56,34 +62,27 @@ export default {
 	 * 删除地址
 	 */
 	delAddress({commit}, addressId) {
-		return api.delAddress(addressId).then( isOk => {
-			if ( isOk.code === api.ApiSuccess ) {
-				commit(types.MY_ADDRESS_DELETE_OK, addressId)
-			} else {
-				commit(types.MY_ADDRESS_DELETE_FAIL, addressId)
-			}
-			return isOk
+		return api.delAddress(addressId).then( res => {
+      commit(types.MY_ADDRESS_DELETED, addressId)
+			return res.data
 		})
 	},
 
-	/**
-	 * 添加一个地址
-	 */
-	addAddress({commit}, address) {
-		return api.addAddress(address).then( resAddr => {
-			commit(types.MY_ADDRESS_ADDED, resAddr)
-			return resAddr
-		})
-	},
+  setPrimaryAddress({commit}, addressId) {
+	  return api.primaryAddress(addressId).then( res => {
+      commit(types.MY_ADDRESS_PRIMARY_UPDATED, addressId)
+      return res.data
+    })
+  },
 
-	/**
-	 * 根据 订单 状态筛选订单
-	 * 有分页机制
-	 */
-	loadMyOrders({commit}, { status, pageNum=1, pageSize=10 }) {
-		return api.loadMyOrders({ status, pageNum, pageSize }).then( orders => {
-			commit(types.MY_ORDERS_LOADED, orders)
-			return orders
-		})
-	}
+  /**
+   * 根据订单id获取订单详情
+   */
+  getOrderDetailsById({commit}, orderId) {
+	  return api.getOrderDetailsById(orderId).then( res => {
+      commit(types.MY_CONSUME_ORDER_LOADED, res.data)
+	    return res.data
+    })
+  },
+
 }

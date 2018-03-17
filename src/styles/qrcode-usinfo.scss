@@ -1,0 +1,37 @@
+.sx-dialog-header-bar {
+  min-height: 30px;
+  width: 100%;
+  position: relative;
+}
+.dialog-close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: url("../../assets/close-empty.svg") no-repeat center;
+  background-size: contain;
+}
+.us-info {
+  .us-info-wrap {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 2rem 2rem 2rem;
+    .qrcode {
+      width: 10rem;
+      height: 10rem;
+      display: block;
+    }
+    .us-info-name {
+      font-size: 0.8rem;
+      margin: 10px 0 5px 0;
+    }
+    .us-info-slogan {
+      font-size: 0.6rem;
+      color: #666666;
+    }
+  }
+}
